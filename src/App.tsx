@@ -20,12 +20,12 @@ import Contact from './pages/Contact';
 import OurStoryPage from './pages/OurStory';
 
 // Admin Components
-import AdminLayout from './pages/admin/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminCategories from './pages/admin/AdminCategories';
-import AdminContent from './pages/admin/AdminContent';
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminProducts from './components/admin/AdminProducts';
+import AdminOrders from './components/admin/AdminOrders';
+import AdminCategories from './components/admin/AdminCategories';
+import AdminContent from './components/admin/AdminContent';
 
 const Home = () => {
   return (
