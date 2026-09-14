@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, Filter } from 'lucide-react';
 import { PRODUCTS, CATEGORIES } from '../constants';
 import ProductCard from '../components/ProductCard';
@@ -7,9 +8,18 @@ import Footer from '../components/Footer';
 import { cn } from '../lib/utils';
 
 const Shop = () => {
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('সব');
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam || 'সব');
   const [sortBy, setSortBy] = useState('newest');
+
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [categoryParam]);
 
   const filteredProducts = PRODUCTS.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
