@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
-interface OurStoryProps {
+interface OurStorySectionProps {
   content: {
     title: string;
     description: string;
@@ -11,7 +11,7 @@ interface OurStoryProps {
   };
 }
 
-const OurStory = ({ content }: OurStoryProps) => {
+const OurStorySection = ({ content }: OurStorySectionProps) => {
   return (
     <section className="py-24 px-6 max-w-7xl mx-auto overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -57,4 +57,4 @@ const OurStory = ({ content }: OurStoryProps) => {
   );
 };
 
-export default OurStory;
+export default OurStorySection;

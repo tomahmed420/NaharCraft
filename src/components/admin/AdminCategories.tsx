@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Plus, Edit2, Trash2 } from 'lucide-react';
-import { CATEGORIES } from '../../constants';
+import { CATEGORIES } from '../../data/categories';
 
 const AdminCategories = () => {
   return (

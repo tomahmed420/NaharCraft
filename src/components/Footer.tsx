@@ -80,17 +80,8 @@ const Footer = () => {
         </div>
         
         {/* Bottom Bar */}
-        <div className="pt-5 lg:pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-gray-500 text-[9px] sm:text-[10px] lg:text-xs">
+        <div className="pt-5 lg:pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-3 text-gray-500 text-[9px] sm:text-[10px] lg:text-xs">
           <p>© {new Date().getFullYear()} NaharCraft. সর্বস্বত্ব সংরক্ষিত। ❤️</p>
-          <div className="flex items-center gap-3">
-            <span className="opacity-50 font-medium tracking-widest uppercase">We Accept</span>
-            <div className="flex gap-2 opacity-50 grayscale">
-              {/* Optional Placeholder icons for payments */}
-              <div className="w-6 h-4 bg-white/20 rounded-sm"></div>
-              <div className="w-6 h-4 bg-white/20 rounded-sm"></div>
-              <div className="w-6 h-4 bg-white/20 rounded-sm"></div>
-            </div>
-          </div>
         </div>
       </div>
     </footer>

@@ -17,7 +17,7 @@ import {
   Line
 } from 'recharts';
 import { cn } from '../../lib/utils';
-import { MOCK_ORDERS } from '../../constants';
+import { MOCK_ORDERS } from '../../data/mock-orders';
 
 const data = [
   { name: 'সোম', sales: 400 },

@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import OurStorySection from '../components/OurStory';
-import { INITIAL_CONTENT } from '../constants';
+import OurStorySection from '../components/OurStorySection';
+import { INITIAL_CONTENT } from '../data/content';
 
 const OurStory = () => {
   return (

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Save } from 'lucide-react';
-import { INITIAL_CONTENT } from '../../constants';
+import { INITIAL_CONTENT } from '../../data/content';
 
 const AdminContent = () => {
   const [content, setContent] = useState(INITIAL_CONTENT);

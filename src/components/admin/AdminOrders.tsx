@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShoppingCart, Eye, Edit2 } from 'lucide-react';
-import { MOCK_ORDERS } from '../../constants';
+import { MOCK_ORDERS } from '../../data/mock-orders';
 import { cn } from '../../lib/utils';
 
 const AdminOrders = () => {

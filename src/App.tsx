@@ -1,13 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { INITIAL_CONTENT, CATEGORIES, PRODUCTS, TESTIMONIALS } from './constants';
+import { INITIAL_CONTENT } from './data/content';
+import { CATEGORIES } from './data/categories';
+import { PRODUCTS } from './data/products';
+import { TESTIMONIALS } from './data/testimonials';
 
 // Frontend Components
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CategoryGrid from './components/CategoryGrid';
 import FeaturedProducts from './components/FeaturedProducts';
-import OurStory from './components/OurStory';
+import OurStorySection from './components/OurStorySection';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 
@@ -17,12 +20,12 @@ import Contact from './pages/Contact';
 import OurStoryPage from './pages/OurStory';
 
 // Admin Components
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './components/admin/AdminDashboard';
-import AdminProducts from './components/admin/AdminProducts';
-import AdminOrders from './components/admin/AdminOrders';
-import AdminCategories from './components/admin/AdminCategories';
-import AdminContent from './components/admin/AdminContent';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminContent from './pages/admin/AdminContent';
 
 const Home = () => {
   return (
@@ -31,7 +34,7 @@ const Home = () => {
       <Hero content={INITIAL_CONTENT.hero} />
       <CategoryGrid categories={CATEGORIES} />
       <FeaturedProducts products={PRODUCTS} />
-      <OurStory content={INITIAL_CONTENT.ourStory} />
+      <OurStorySection content={INITIAL_CONTENT.ourStory} />
       <Testimonials testimonials={TESTIMONIALS} />
       <Footer />
     </div>

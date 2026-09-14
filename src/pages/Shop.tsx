@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Filter } from 'lucide-react';
-import { PRODUCTS, CATEGORIES } from '../constants';
+import { PRODUCTS } from '../data/products';
+import { CATEGORIES } from '../data/categories';
 import ProductCard from '../components/ProductCard';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Star, X, Image as ImageIcon } from 'lucide-react';
-import { PRODUCTS } from '../../constants';
+import { PRODUCTS } from '../../data/products';
 
 const AdminProducts = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
