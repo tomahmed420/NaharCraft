@@ -43,6 +43,7 @@ const Home = () => {
 
 import { CartProvider } from './context/CartContext';
 
+// Trigger fresh build for Vercel
 export default function App() {
   return (
     <CartProvider>
