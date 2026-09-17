@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ShoppingBag, ShoppingCart, MessageCircle, Check } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 
@@ -12,6 +12,7 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const navigate = useNavigate();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -21,13 +22,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
     setTimeout(() => setIsAdded(false), 1500);
   };
 
+  const handleCardClick = () => {
+    navigate(`/product/${product.id}`);
+  };
+
   const whatsappMessage = encodeURIComponent(
     `হ্যালো! আমি NaharCraft থেকে "${product.name}" (মূল্য: ৳${product.price}) অর্ডার/বিস্তারিত জানতে আগ্রহী।`
   );
   const whatsappUrl = `https://wa.me/8801234567890?text=${whatsappMessage}`;
 
   return (
-    <Link to={`/product/${product.id}`} className="block h-full group">
+    <div onClick={handleCardClick} className="block h-full group cursor-pointer">
       <motion.div 
         whileHover={{ y: -4 }}
         transition={{ duration: 0.2 }}
@@ -108,7 +113,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         </div>
       </motion.div>
-    </Link>
+    </div>
   );
 };
 
