@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Shield, Lock, User, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useData, DEFAULT_MASTER_ADMIN } from '../../context/DataContext';
+import { Shield, Lock, User, Eye, EyeOff, ArrowRight, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useData } from '../../context/DataContext';
 
 interface AdminLoginProps {
   onSuccess?: () => void;
@@ -28,12 +28,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         setError(res.message || 'ভুল ইউজারনেম বা পাসওয়ার্ড!');
       }
     }, 300);
-  };
-
-  const fillMasterCredentials = () => {
-    setUsername(DEFAULT_MASTER_ADMIN.username);
-    setPassword(DEFAULT_MASTER_ADMIN.password);
-    setError(null);
   };
 
   return (
@@ -146,29 +140,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
               )}
             </button>
           </form>
-
-          {/* Quick Master Credentials helper box */}
-          <div className="mt-6 pt-5 border-t border-slate-800">
-            <div className="p-3 bg-slate-800/60 rounded-xl border border-slate-700/60 flex items-start gap-3">
-              <KeyRound size={16} className="text-amber-400 shrink-0 mt-0.5" />
-              <div className="flex-1 text-xs">
-                <p className="font-semibold text-slate-200">ডিফল্ট মাস্টার অ্যাডমিন লগইন:</p>
-                <div className="mt-1 flex items-center gap-2 text-slate-400 font-mono text-[11px]">
-                  <span>ইউজার: <b className="text-amber-300">admin</b></span>
-                  <span>•</span>
-                  <span>পাসওয়ার্ড: <b className="text-amber-300">admin</b></span>
-                </div>
-                <button
-                  type="button"
-                  onClick={fillMasterCredentials}
-                  className="mt-2 text-[11px] text-primary hover:text-amber-300 font-medium underline flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <Sparkles size={12} />
-                  <span>ক্লিক করে তথ্য স্বয়ংক্রিয়ভাবে পূরণ করুন</span>
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Security badge footer */}

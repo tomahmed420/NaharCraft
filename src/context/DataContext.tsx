@@ -16,6 +16,7 @@ import { CATEGORIES } from '../data/categories';
 import { INITIAL_CONTENT } from '../data/content';
 import { TESTIMONIALS } from '../data/testimonials';
 import { INITIAL_FAQS, INITIAL_PROMOS, INITIAL_SETTINGS } from '../data/faqs';
+import { supabase } from '../lib/supabase';
 
 const STORAGE_KEY = 'naharcraft_live_database_v2';
 const SESSION_KEY = 'naharcraft_admin_session_v1';
@@ -126,6 +127,28 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
     return defaultState;
   });
+
+  // Fetch from Supabase on mount
+  useEffect(() => {
+    const fetchFromSupabase = async () => {
+      try {
+        // Fetch products
+        const { data: supaProducts, error: prodError } = await supabase.from('products').select('*');
+        if (!prodError && supaProducts && supaProducts.length > 0) {
+          setData(prev => ({ ...prev, products: supaProducts as any }));
+        }
+
+        // Fetch categories
+        const { data: supaCats, error: catError } = await supabase.from('categories').select('*');
+        if (!catError && supaCats && supaCats.length > 0) {
+          setData(prev => ({ ...prev, categories: supaCats as any }));
+        }
+      } catch (err) {
+        console.error('Supabase fetch failed, falling back to local data', err);
+      }
+    };
+    fetchFromSupabase();
+  }, []);
 
   // Current logged in admin session
   const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(() => {
@@ -281,67 +304,126 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Product Operations
-  const addProduct = (newProd: Omit<Product, 'id'>) => {
-    setData(prev => {
-      const newId = prev.products.length > 0 ? Math.max(...prev.products.map(p => p.id)) + 1 : 1;
-      return {
-        ...prev,
-        products: [{ ...newProd, id: newId, inStock: newProd.inStock !== false }, ...prev.products]
-      };
-    });
+  const addProduct = async (newProd: Omit<Product, 'id'>) => {
+    // Generate optimistic ID
+    const newId = data.products.length > 0 ? Math.max(...data.products.map(p => Number(p.id) || 0)) + 1 : 1;
+    const productToInsert = { ...newProd, id: newId, inStock: newProd.inStock !== false };
+    
+    // Update local UI instantly
+    setData(prev => ({
+      ...prev,
+      products: [productToInsert, ...prev.products]
+    }));
+
+    // Push to Supabase
+    try {
+      await supabase.from('products').insert([productToInsert]);
+    } catch (e) {
+      console.error('Failed to sync new product to Supabase:', e);
+    }
   };
 
-  const updateProduct = (id: number, updated: Partial<Product>) => {
+  const updateProduct = async (id: number, updated: Partial<Product>) => {
+    // Update local UI instantly
     setData(prev => ({
       ...prev,
       products: prev.products.map(p => (p.id === id ? { ...p, ...updated } : p))
     }));
+
+    // Push to Supabase
+    try {
+      await supabase.from('products').update(updated).eq('id', id);
+    } catch (e) {
+      console.error('Failed to update product in Supabase:', e);
+    }
   };
 
-  const deleteProduct = (id: number) => {
+  const deleteProduct = async (id: number) => {
+    // Update local UI instantly
     setData(prev => ({
       ...prev,
       products: prev.products.filter(p => p.id !== id)
     }));
+
+    // Push to Supabase
+    try {
+      await supabase.from('products').delete().eq('id', id);
+    } catch (e) {
+      console.error('Failed to delete product from Supabase:', e);
+    }
   };
 
-  const toggleProductStock = (id: number) => {
+  const toggleProductStock = async (id: number) => {
+    const product = data.products.find(p => p.id === id);
+    if (!product) return;
+    const newInStock = !product.inStock;
+
     setData(prev => ({
       ...prev,
-      products: prev.products.map(p => (p.id === id ? { ...p, inStock: !p.inStock } : p))
+      products: prev.products.map(p => (p.id === id ? { ...p, inStock: newInStock } : p))
     }));
+
+    try {
+      await supabase.from('products').update({ inStock: newInStock }).eq('id', id);
+    } catch (e) {}
   };
 
-  const toggleProductFeatured = (id: number) => {
+  const toggleProductFeatured = async (id: number) => {
+    const product = data.products.find(p => p.id === id);
+    if (!product) return;
+    const newFeatured = !product.featured;
+
     setData(prev => ({
       ...prev,
-      products: prev.products.map(p => (p.id === id ? { ...p, featured: !p.featured } : p))
+      products: prev.products.map(p => (p.id === id ? { ...p, featured: newFeatured } : p))
     }));
+
+    try {
+      await supabase.from('products').update({ featured: newFeatured }).eq('id', id);
+    } catch (e) {}
   };
 
   // Category Operations
-  const addCategory = (newCat: Omit<Category, 'id'>) => {
-    setData(prev => {
-      const newId = prev.categories.length > 0 ? Math.max(...prev.categories.map(c => c.id)) + 1 : 1;
-      return {
-        ...prev,
-        categories: [...prev.categories, { ...newCat, id: newId }]
-      };
-    });
+  const addCategory = async (newCat: Omit<Category, 'id'>) => {
+    const newId = data.categories.length > 0 ? Math.max(...data.categories.map(c => Number(c.id) || 0)) + 1 : 1;
+    const catToInsert = { ...newCat, id: newId };
+    
+    setData(prev => ({
+      ...prev,
+      categories: [...prev.categories, catToInsert]
+    }));
+
+    try {
+      await supabase.from('categories').insert([catToInsert]);
+    } catch (e) {
+      console.error('Failed to sync new category to Supabase:', e);
+    }
   };
 
-  const updateCategory = (id: number, updated: Partial<Category>) => {
+  const updateCategory = async (id: number, updated: Partial<Category>) => {
     setData(prev => ({
       ...prev,
       categories: prev.categories.map(c => (c.id === id ? { ...c, ...updated } : c))
     }));
+
+    try {
+      await supabase.from('categories').update(updated).eq('id', id);
+    } catch (e) {
+      console.error('Failed to update category in Supabase:', e);
+    }
   };
 
-  const deleteCategory = (id: number) => {
+  const deleteCategory = async (id: number) => {
     setData(prev => ({
       ...prev,
       categories: prev.categories.filter(c => c.id !== id)
     }));
+
+    try {
+      await supabase.from('categories').delete().eq('id', id);
+    } catch (e) {
+      console.error('Failed to delete category from Supabase:', e);
+    }
   };
 
   // Content Operations

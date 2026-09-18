@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, ArrowRight, Facebook, Instagram, Youtube, Mail, ShieldCheck } from 'lucide-react';
+import { MessageCircle, ArrowRight, Facebook, Instagram, Youtube, Mail } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 const Footer = () => {
@@ -38,12 +38,6 @@ const Footer = () => {
                 <li><Link to="/shop" className="hover:text-primary transition-colors">Shop</Link></li>
                 <li><Link to="/our-story" className="hover:text-primary transition-colors">About Us</Link></li>
                 <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
-                <li>
-                  <Link to="/admin" className="text-primary hover:underline flex items-center gap-1">
-                    <ShieldCheck size={12} />
-                    <span>Admin Panel</span>
-                  </Link>
-                </li>
               </ul>
             </div>
             <div>
@@ -90,10 +84,6 @@ const Footer = () => {
         <div className="pt-5 lg:pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-gray-400 text-[10px] sm:text-xs">
           <p>© {new Date().getFullYear()} NaharCraft. সর্বস্বত্ব সংরক্ষিত।</p>
           <div className="flex items-center gap-4">
-            <Link to="/admin" className="hover:text-primary transition-colors flex items-center gap-1 text-[11px]">
-              <ShieldCheck size={12} />
-              <span>মালিকের অ্যাডমিন প্যানেল</span>
-            </Link>
             <p className="flex items-center gap-1.5 text-gray-400">
               <span>Made by</span>
               <span className="text-gray-200 font-medium tracking-wide">Shahjalal Ahmed</span>
