@@ -1,8 +1,8 @@
 import { Category } from '../types';
 
 export const CATEGORIES: Category[] = [
-  { id: 1, name: "আনুষঙ্গিক সরঞ্জাম", image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&q=80&w=600&h=600" },
-  { id: 2, name: "ক্রুশবিদ্ধ ফুল", image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600&h=600" },
-  { id: 3, name: "ডয়লি", image: "https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&q=80&w=600&h=600" },
-  { id: 4, name: "ঘর সজ্জা", image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=600&h=600" }
+  { id: 1, name: "ফ্যাশন ও এক্সেসরিজ", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=600&h=600" },
+  { id: 2, name: "ক্রুশ বোনা ফুল", image: "https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&q=80&w=600&h=600" },
+  { id: 3, name: "টেবিল ও ডইলি", image: "https://images.unsplash.com/photo-1520638575086-1f6cc9759d57?auto=format&fit=crop&q=80&w=600&h=600" },
+  { id: 4, name: "অন্দরসজ্জা", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=600&h=600" }
 ];

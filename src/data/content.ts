@@ -2,19 +2,19 @@ import { SiteContent } from '../types';
 
 export const INITIAL_CONTENT: SiteContent = {
   hero: {
-    title: "চমৎকার হস্তশিল্পিত সৃষ্টি",
-    subtitle: "অনিন্দ্য ক্রুশবিদ্ধ ফুল, ডয়লি এবং ঘর সাজানোর সরঞ্জামসমূহ আবিষ্কার করুন — প্রতিটি পিস বাংলাদেশের দক্ষ কারিগরদের দ্বারা ভালোবাসায় হাতে তৈরি।",
-    buttonText: "Shop Now",
+    title: "হাতে বোনা ভালোবাসার ছোঁয়া",
+    subtitle: "নাহার ক্রাফট-এ আপনাকে স্বাগতম। আমাদের প্রতিটি ক্রোশে পণ্য শুধু সুতো দিয়ে নয়, অনেক যত্ন আর ভালোবাসা দিয়ে তৈরি। ঘর সাজাতে বা প্রিয়জনকে উপহার দিতে বেছে নিন আমাদের এই হাতে তৈরি শিল্পগুলো।",
+    buttonText: "আমাদের কালেকশন দেখুন",
     images: [
-      "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&q=80&w=1920&h=1080",
-      "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=1920&h=1080",
-      "https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&q=80&w=1920&h=1080"
+      "https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&q=80&w=1920&h=1080",
+      "https://images.unsplash.com/photo-1628151016629-87391ea652d8?auto=format&fit=crop&q=80&w=1920&h=1080",
+      "https://images.unsplash.com/photo-1598460597371-50e50fc335d5?auto=format&fit=crop&q=80&w=1920&h=1080"
     ]
   },
   ourStory: {
-    title: "নাহারক্রাফ্ট-এর পেছনের কারিগরের সাথে পরিচিত হন",
-    description: "আমি কামরুন নাহার, এবং এখানে আপনি যা দেখছেন তার প্রতিটি পিস আবেগ এবং নিষ্ঠার সাথে হাতে তৈরি করা হয়েছে। সেরা সুতা নির্বাচন থেকে শুরু করে শেষ সেলাই পর্যন্ত, প্রতিটি সৃষ্টিতে আমার হৃদয়ের ছোঁয়া রয়েছে।",
-    image: "https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&q=80&w=800&h=800"
+    title: "আমাদের গল্প, সুতোয় বোনা স্বপ্ন",
+    description: "আমি কামরুন নাহার। নাহার ক্রাফট শুধুমাত্র একটি দোকান নয়, এটি আমার শখ আর ভালোবাসার একটি ছোট পৃথিবী। সেরা সুতো নির্বাচন থেকে শুরু করে শেষ সেলাই পর্যন্ত, প্রতিটি পণ্য আমি নিজের হাতে অনেক যত্ন নিয়ে তৈরি করি।",
+    image: "https://images.unsplash.com/photo-1605380590483-36655c65fbb3?auto=format&fit=crop&q=80&w=800&h=800"
   },
   contact: {
     email: "hello@naharcraft.com",

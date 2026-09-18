@@ -17,7 +17,7 @@ import { INITIAL_CONTENT } from '../data/content';
 import { TESTIMONIALS } from '../data/testimonials';
 import { INITIAL_FAQS, INITIAL_PROMOS, INITIAL_SETTINGS } from '../data/faqs';
 
-const STORAGE_KEY = 'naharcraft_live_database_v1';
+const STORAGE_KEY = 'naharcraft_live_database_v2';
 const SESSION_KEY = 'naharcraft_admin_session_v1';
 
 export const DEFAULT_MASTER_ADMIN: AdminUser = {
