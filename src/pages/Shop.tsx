@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Filter } from 'lucide-react';
-import { PRODUCTS } from '../data/products';
-import { CATEGORIES } from '../data/categories';
+import { useData } from '../context/DataContext';
 import ProductCard from '../components/ProductCard';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { cn } from '../lib/utils';
 
 const Shop = () => {
+  const { products, categories } = useData();
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
 
@@ -22,8 +22,9 @@ const Shop = () => {
     }
   }, [categoryParam]);
 
-  const filteredProducts = PRODUCTS.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          product.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'সব' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -90,7 +91,7 @@ const Shop = () => {
                 >
                   সব পণ্য
                 </button>
-                {CATEGORIES.map(cat => (
+                {categories.map(cat => (
                   <button 
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.name)}

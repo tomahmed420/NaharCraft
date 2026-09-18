@@ -1,5 +1,6 @@
 {
   "name": "NaharCraft",
   "description": "বাংলাদেশের সুন্দর এবং দৃষ্টিনন্দন হাতে তৈরি ক্রুশবিদ্ধ পণ্য (Beautiful handcrafted crochet creations from Bangladesh).",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

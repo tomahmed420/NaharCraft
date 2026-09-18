@@ -1,9 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { INITIAL_CONTENT } from './data/content';
-import { CATEGORIES } from './data/categories';
-import { PRODUCTS } from './data/products';
-import { TESTIMONIALS } from './data/testimonials';
+import { DataProvider, useData } from './context/DataContext';
+import { CartProvider } from './context/CartContext';
 
 // Frontend Components
 import Navbar from './components/Navbar';
@@ -32,52 +30,65 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminCategories from './pages/admin/AdminCategories';
+import AdminHeroBanner from './pages/admin/AdminHeroBanner';
 import AdminContent from './pages/admin/AdminContent';
+import AdminFAQReviews from './pages/admin/AdminFAQReviews';
+import AdminSettings from './pages/admin/AdminSettings';
+import AdminUsers from './pages/admin/AdminUsers';
 
 const Home = () => {
+  const { hero, categories, products, testimonials } = useData();
+
+  // Featured products or first 6 products
+  const featured = products.filter(p => p.featured);
+  const displayProducts = featured.length > 0 ? featured : products.slice(0, 6);
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      <Hero content={INITIAL_CONTENT.hero} />
-      <CategoryGrid categories={CATEGORIES} />
-      <FeaturedProducts products={PRODUCTS} />
+      <Hero content={hero} />
+      <CategoryGrid categories={categories} />
+      <FeaturedProducts products={displayProducts} />
       <OfferBanner />
       <FAQSection />
-      <Testimonials testimonials={TESTIMONIALS} />
+      <Testimonials testimonials={testimonials} />
       <Footer />
     </div>
   );
 };
 
-import { CartProvider } from './context/CartContext';
-
-// Trigger fresh build for Vercel
 export default function App() {
   return (
-    <CartProvider>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Frontend Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/our-story" element={<OurStoryPage />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/shipping" element={<ShippingPolicy />} />
-          <Route path="/returns" element={<ReturnPolicy />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
+    <DataProvider>
+      <CartProvider>
+        <Router>
+          <ScrollToTop />
+          <Routes>
+            {/* Frontend Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/our-story" element={<OurStoryPage />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/shipping" element={<ShippingPolicy />} />
+            <Route path="/returns" element={<ReturnPolicy />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-          <Route path="/admin/products" element={<AdminLayout><AdminProducts /></AdminLayout>} />
-          <Route path="/admin/orders" element={<AdminLayout><AdminOrders /></AdminLayout>} />
-          <Route path="/admin/categories" element={<AdminLayout><AdminCategories /></AdminLayout>} />
-          <Route path="/admin/banners" element={<AdminLayout><div className="text-center py-20 text-gray-400">Banners Management Coming Soon</div></AdminLayout>} />
-          <Route path="/admin/content" element={<AdminLayout><AdminContent /></AdminLayout>} />
-        </Routes>
-      </Router>
-    </CartProvider>
+            {/* Admin Live Management Routes */}
+            <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+            <Route path="/admin/products" element={<AdminLayout><AdminProducts /></AdminLayout>} />
+            <Route path="/admin/categories" element={<AdminLayout><AdminCategories /></AdminLayout>} />
+            <Route path="/admin/banners" element={<AdminLayout><AdminHeroBanner /></AdminLayout>} />
+            <Route path="/admin/content" element={<AdminLayout><AdminContent /></AdminLayout>} />
+            <Route path="/admin/faq-reviews" element={<AdminLayout><AdminFAQReviews /></AdminLayout>} />
+            <Route path="/admin/orders" element={<AdminLayout><AdminOrders /></AdminLayout>} />
+            <Route path="/admin/admins" element={<AdminLayout><AdminUsers /></AdminLayout>} />
+            <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+          </Routes>
+        </Router>
+      </CartProvider>
+    </DataProvider>
   );
 }
+

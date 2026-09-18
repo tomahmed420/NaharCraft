@@ -3,9 +3,11 @@ import { motion } from 'motion/react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import OurStorySection from '../components/OurStorySection';
-import { INITIAL_CONTENT } from '../data/content';
+import { useData } from '../context/DataContext';
 
 const OurStory = () => {
+  const { ourStory } = useData();
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -22,7 +24,7 @@ const OurStory = () => {
         <div className="w-20 h-1 bg-primary mx-auto rounded-full" />
       </section>
 
-      <OurStorySection content={INITIAL_CONTENT.ourStory} />
+      <OurStorySection content={ourStory} />
 
       {/* More details */}
       <section className="py-12 md:py-24 px-6 max-w-4xl mx-auto text-center">

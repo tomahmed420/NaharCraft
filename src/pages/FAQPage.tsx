@@ -5,71 +5,15 @@ import { HelpCircle, Search, ChevronDown, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-
-interface FAQ {
-  id: string;
-  category: string;
-  question: string;
-  answer: string;
-}
-
-const ALL_FAQS: FAQ[] = [
-  {
-    id: '1',
-    category: 'order',
-    question: 'NaharCraft-এ কিভাবে অর্ডার কনফার্ম করব?',
-    answer: 'আমাদের ওয়েবসাইট থেকে আপনার পছন্দের হস্তশিল্পটি কার্টে যোগ করে সরাসরি "চেকআউট" করতে পারেন। এছাড়া সরাসরি আমাদের হোয়াটসঅ্যাপ নম্বরে পণ্যটির ছবি বা নাম পাঠিয়ে ঠিকানা ও মোবাইল নম্বর দিলে আমাদের প্রতিনিধি আপনার অর্ডারটি কনফার্ম করে দেবেন।'
-  },
-  {
-    id: '2',
-    category: 'order',
-    question: 'ক্যাশ অন ডেলিভারি (COD) সুবিধা কি সারা দেশে আছে?',
-    answer: 'হ্যাঁ! ঢাকা শহর সহ সারা বাংলাদেশের প্রতিটি জেলা ও উপজেলায় শতভাগ ক্যাশ অন ডেলিভারি সুবিধা রয়েছে। পণ্য হাতে পেয়ে চেক করে মূল্য পরিশোধ করতে পারবেন।'
-  },
-  {
-    id: '3',
-    category: 'delivery',
-    question: 'ডেলিভারি চার্জ কত এবং ডেলিভারি পেতে কতদিন সময় লাগবে?',
-    answer: 'ডেলিভারি চার্জ ঢাকা সিটির ভেতর মাত্র ৭০ টাকা (২-৩ কার্যদিবস) এবং ঢাকা সিটির বাইরে ১৩০ টাকা (৩-৫ কার্যদিবস)। এছাড়া ১০০০ টাকা বা তদূর্ধ্ব অর্ডারে সারা দেশে ফ্রি ডেলিভারি প্রদান করা হয়।'
-  },
-  {
-    id: '4',
-    category: 'craft',
-    question: 'পণ্যগুলো কি সম্পূর্ণ হাতে বোনা ও টেকসই?',
-    answer: 'হ্যাঁ, NaharCraft-এর প্রতিটি পণ্য শতভাগ নিপুণ হাতে বোনা। আমরা উন্নতমানের কটন সুতা এবং টেকসই উপাদান ব্যবহার করি। সঠিক যত্নে পণ্যগুলো বহু বছর পর্যন্ত তার রঙ ও রূপ বজায় রাখে।'
-  },
-  {
-    id: '5',
-    category: 'craft',
-    question: 'পছন্দ অনুযায়ী কালার বা সাইজ কাস্টমাইজ করা যাবে কি?',
-    answer: 'অবশ্যই! আপনার ঘরের দেয়ালের রঙ বা থিম অনুযায়ী যেকোনো রঙে অথবা পছন্দের সাইজে কাস্টমাইজ করে দেওয়ার সুবিধা রয়েছে। এর জন্য সরাসরি আমাদের হোয়াটসঅ্যাপে যোগাযোগ করে আপনার চাহিদা জানাতে পারেন।'
-  },
-  {
-    id: '6',
-    category: 'order',
-    question: 'পণ্য পছন্দ না হলে বা ক্ষতিগ্রস্ত পেলে কি এক্সচেঞ্জ করা যাবে?',
-    answer: 'ডেলিভারির সময় পার্সেল চেক করে গ্রহণ করুন। কোনো কারণে পণ্য ক্ষতিগ্রস্ত হলে বা ভুল পণ্য এলে ডেলিভারির ২৪ ঘণ্টার মধ্যে আমাদের জানালে আমরা দ্রুত বিনামূল্যে পণ্যটি এক্সচেঞ্জ করে দেব।'
-  },
-  {
-    id: '7',
-    category: 'craft',
-    question: 'ক্রুশবিদ্ধ বা হস্তশিল্প পণ্যগুলো কীভাবে পরিষ্কার বা ধোয়া উচিত?',
-    answer: 'হালকা ঠান্ডা পানিতে মৃদু ডিটারজেন্ট দিয়ে হাত দিয়ে আলতো করে ধুয়ে ছায়ায় শুকিয়ে নিতে হবে। সরাসরি কড়া রোদে বেশিক্ষণ রাখবেন না এবং ওয়াশিং মেশিনে ধোয়া থেকে বিরত থাকুন।'
-  },
-  {
-    id: '8',
-    category: 'delivery',
-    question: 'জরুরি প্রয়োজনে কি সেম-ডে ডেলিভারি দেওয়া সম্ভব?',
-    answer: 'ঢাকা সিটির ভেতরে বিশেষ প্রয়োজনে অতিরিক্ত চার্জ সাপেক্ষে এক্সপ্রেস সেম-ডে বা নেক্সট-ডে ডেলিভারির ব্যবস্থা রয়েছে। জরুরি অর্ডারের ক্ষেত্রে সরাসরি আমাদের হেল্পলাইনে কল করুন।'
-  }
-];
+import { useData } from '../context/DataContext';
 
 const FAQPage = () => {
+  const { faqs, contact } = useData();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [openId, setOpenId] = useState<string | null>('1');
+  const [openId, setOpenId] = useState<string | null>(faqs[0]?.id || null);
 
-  const filteredFaqs = ALL_FAQS.filter((faq) => {
+  const filteredFaqs = faqs.filter((faq) => {
     const matchesCategory = activeCategory === 'all' || faq.category === activeCategory;
     const matchesSearch =
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,6 +24,8 @@ const FAQPage = () => {
   const toggleFAQ = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
   };
+
+  const whatsappNumber = contact.whatsapp.replace(/[^0-9]/g, '');
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50/50">
@@ -215,7 +161,7 @@ const FAQPage = () => {
               </p>
             </div>
             <a
-              href="https://wa.me/8801234567890?text=Hello%20I%20have%20a%20question"
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello! I have a question about NaharCraft')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#25D366]/90 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-xs shrink-0 active:scale-95"

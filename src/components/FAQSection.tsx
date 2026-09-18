@@ -3,63 +3,21 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, HelpCircle, MessageCircle, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-
-interface FAQItem {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-const FAQS: FAQItem[] = [
-  {
-    id: 'order',
-    question: 'NaharCraft-এ কিভাবে অর্ডার কনফার্ম করব?',
-    answer:
-      'আমাদের ওয়েবসাইট থেকে খুব সহজেই আপনার পছন্দের পণ্যটি কার্টে (Cart) যুক্ত করে "চেকআউট" অপশন থেকে অর্ডার করতে পারবেন। এছাড়াও সরাসরি আমাদের অফিসিয়াল হোয়াটসঅ্যাপ নম্বরে পণ্যের নাম বা স্ক্রিনশট পাঠিয়ে ঠিকানা প্রদান করে নিমেষেই অর্ডার কনফার্ম করতে পারবেন।'
-  },
-  {
-    id: 'delivery-time',
-    question: 'ডেলিভারি পেতে কতদিন সময় লাগে?',
-    answer:
-      'রেডি-স্টক পণ্যের ক্ষেত্রে ঢাকা সিটির ভেতর সাধারণত ২ থেকে ৩ কার্যদিবস এবং ঢাকার বাইরে ৩ থেকে ৫ কার্যদিবসের মধ্যে ডেলিভারি সম্পন্ন হয়। কোনো পণ্য যদি স্পেশালভাবে তৈরি (Made-to-order) করিয়ে নিতে চান, তবে অতিরিক্ত ২-৩ দিন সময় লাগতে পারে।'
-  },
-  {
-    id: 'cod-charge',
-    question: 'ডেলিভারি চার্জ কত এবং ক্যাশ অন ডেলিভারি (COD) সুবিধা আছে কি?',
-    answer:
-      'হ্যাঁ, সারা বাংলাদেশে সম্পূর্ণ ক্যাশ অন ডেলিভারি সুবিধা রয়েছে। পণ্য হাতে পেয়ে চেক করে মূল্য পরিশোধ করতে পারবেন। ডেলিভারি চার্জ: ঢাকা সিটির ভেতরে মাত্র ৭০ টাকা এবং ঢাকা সিটির বাইরে ১৩০ টাকা।'
-  },
-  {
-    id: 'handmade-quality',
-    question: 'পণ্যগুলো কি সম্পূর্ণ হাতে তৈরি ও টেকসই?',
-    answer:
-      'অবশ্যই! NaharCraft-এর প্রতিটি পণ্য শতভাগ নিখুঁত হাতে বোনা। আমরা প্রিমিয়াম ও টেকসই কটন সুতা এবং মানসম্মত কাঁচামাল ব্যবহার করি। প্রতিটি পণ্যের ফিনিশিংয়ে বিশেষ যত্ন নেওয়া হয় যেন তা দীর্ঘস্থায়ী হয় এবং এর রঙ ও আকার অপরিবর্তিত থাকে।'
-  },
-  {
-    id: 'customization',
-    question: 'পছন্দমতো রঙ, সাইজ বা ডিজাইনে কাস্টমাইজ করে নেওয়া যাবে কি?',
-    answer:
-      'হ্যাঁ, আমরা কাস্টমাইজড অর্ডারের সুবিধা দিয়ে থাকি। আপনি চাইলে নির্দিষ্ট কোনো রঙ, বিশেষ কোনো সাইজ কিংবা পছন্দের কোনো বিশেষ উপহারের জন্য কাস্টমাইজ করে অর্ডার করতে পারেন। এর জন্য সরাসরি আমাদের হোয়াটসঅ্যাপে যোগাযোগ করলেই আমাদের টিম আপনাকে সহায়তা করবে।'
-  },
-  {
-    id: 'return-policy',
-    question: 'পণ্য পছন্দ না হলে বা ক্ষতিগ্রস্ত পেলে কি রিটার্ন/এক্সচেঞ্জ করা যাবে?',
-    answer:
-      'ডেলিভারি ম্যান উপস্থিত থাকাকালীন সময়ে পণ্যটি ভালোভাবে দেখে বুঝে নিন। কোনো কারণে পণ্য ক্ষতিগ্রস্ত থাকলে বা ত্রুটিপূর্ণ হলে তৎক্ষণাৎ ডেলিভারি ম্যানের কাছে ফেরত দিতে পারেন অথবা ২৪ ঘণ্টার মধ্যে ছবিসহ আমাদের হোয়াটসঅ্যাপে জানালে আমরা দ্রুত ফ্রি এক্সচেঞ্জের ব্যবস্থা করব।'
-  }
-];
+import { useData } from '../context/DataContext';
 
 const FAQSection = () => {
-  const [openId, setOpenId] = useState<string | null>('order');
+  const { faqs, contact } = useData();
+  const [openId, setOpenId] = useState<string | null>(faqs[0]?.id || null);
 
   const toggleFAQ = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
   };
 
+  const whatsappNumber = contact.whatsapp.replace(/[^0-9]/g, '');
   const whatsappMessage = encodeURIComponent(
     'হ্যালো! NaharCraft পণ্য সম্পর্কে আমার একটি জিজ্ঞাসা ছিল।'
   );
-  const whatsappUrl = `https://wa.me/8801234567890?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <section className="py-12 sm:py-16 px-4 sm:px-6 bg-white border-t border-gray-100">
@@ -80,7 +38,7 @@ const FAQSection = () => {
 
         {/* FAQ Accordion List */}
         <div className="space-y-3 sm:space-y-3.5">
-          {FAQS.map((faq, index) => {
+          {faqs.map((faq, index) => {
             const isOpen = openId === faq.id;
             return (
               <div

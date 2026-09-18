@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Copy, Check, Sparkles, Gift } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 const OfferBanner = () => {
+  const { promos } = useData();
   const [copied, setCopied] = useState(false);
-  const couponCode = 'NAHAR20';
+  const couponCode = promos.banner1.couponCode || 'NAHAR20';
 
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,19 +21,19 @@ const OfferBanner = () => {
       {/* 2 Banners Grid: Side by side on desktop/tablet, sleek compact horizontal cards on mobile */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5">
         
-        {/* Banner 1: ২০% বিশেষ ছাড় */}
+        {/* Banner 1: কুপন ও ছাড় */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-100/90 via-orange-50/90 to-rose-50/80 border border-amber-200/80 p-4 sm:p-5 shadow-xs flex items-center justify-between gap-3 group transition-all hover:shadow-sm">
           <div className="flex-1 flex flex-col justify-between z-10">
             <div>
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full text-[11px] font-semibold mb-2">
                 <Sparkles size={12} className="text-primary" />
-                <span>সীমিত অফার • ২০% ছাড়</span>
+                <span>{promos.banner1.tag}</span>
               </div>
               <h3 className="font-serif font-bold text-gray-900 text-base sm:text-lg lg:text-xl leading-snug mb-1">
-                হাতে বোনা ফুল ও ডয়লি
+                {promos.banner1.title}
               </h3>
               <p className="text-gray-600 text-xs line-clamp-1 mb-3">
-                প্রিয় ক্রুশবিদ্ধ সংগ্রহে পাচ্ছেন বিশেষ মূল্যছাড়
+                {promos.banner1.subtitle}
               </p>
             </div>
 
@@ -51,10 +53,10 @@ const OfferBanner = () => {
               </button>
 
               <Link
-                to="/shop"
+                to={promos.banner1.link || '/shop'}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 group-hover:translate-x-0.5 transition-all ml-1"
               >
-                <span>অফার দেখুন</span>
+                <span>{promos.banner1.buttonText || 'অফার দেখুন'}</span>
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -72,32 +74,32 @@ const OfferBanner = () => {
           </div>
         </div>
 
-        {/* Banner 2: গিফট ও কম্বো প্যাকেজ */}
+        {/* Banner 2: ফ্রি ডেলিভারি */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50/95 via-teal-50/80 to-amber-50/60 border border-emerald-200/80 p-4 sm:p-5 shadow-xs flex items-center justify-between gap-3 group transition-all hover:shadow-sm">
           <div className="flex-1 flex flex-col justify-between z-10">
             <div>
               <div className="inline-flex items-center gap-1.5 bg-emerald-700/10 text-emerald-800 border border-emerald-700/20 px-2.5 py-0.5 rounded-full text-[11px] font-semibold mb-2">
                 <Gift size={12} className="text-emerald-700" />
-                <span>উপহার কম্বো • ফ্রি ডেলিভারি</span>
+                <span>{promos.banner2.tag}</span>
               </div>
               <h3 className="font-serif font-bold text-gray-900 text-base sm:text-lg lg:text-xl leading-snug mb-1">
-                প্রিয়জনের জন্য বিশেষ উপহার
+                {promos.banner2.title}
               </h3>
               <p className="text-gray-600 text-xs line-clamp-1 mb-3">
-                ৳১০০০ বা তদূর্ধ্ব অর্ডারে সারা দেশে ফ্রি শিপিং
+                {promos.banner2.subtitle}
               </p>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-emerald-100/70 text-emerald-800 border border-emerald-200/60">
-                ফ্রি ডেলিভারি প্রযোজ্য
+              <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-emerald-100/80 text-emerald-900 border border-emerald-300">
+                {promos.banner2.minAmountText}
               </span>
 
               <Link
-                to="/shop"
+                to={promos.banner2.link || '/shop'}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 hover:text-emerald-950 group-hover:translate-x-0.5 transition-all ml-1"
               >
-                <span>সংগ্রহ দেখুন</span>
+                <span>{promos.banner2.buttonText || 'কেনাকাটা করুন'}</span>
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -121,3 +123,4 @@ const OfferBanner = () => {
 };
 
 export default OfferBanner;
+

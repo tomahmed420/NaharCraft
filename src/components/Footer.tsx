@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, ArrowRight, Facebook, Instagram, Youtube, Mail } from 'lucide-react';
+import { MessageCircle, ArrowRight, Facebook, Instagram, Youtube, Mail, ShieldCheck } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 const Footer = () => {
+  const { contact } = useData();
+
   return (
     <footer className="bg-footer text-white pt-8 sm:pt-12 lg:pt-20 pb-6 lg:pb-10 px-4 sm:px-6 border-t-2 border-primary/50">
       <div className="max-w-7xl mx-auto">
@@ -35,6 +38,12 @@ const Footer = () => {
                 <li><Link to="/shop" className="hover:text-primary transition-colors">Shop</Link></li>
                 <li><Link to="/our-story" className="hover:text-primary transition-colors">About Us</Link></li>
                 <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+                <li>
+                  <Link to="/admin" className="text-primary hover:underline flex items-center gap-1">
+                    <ShieldCheck size={12} />
+                    <span>Admin Panel</span>
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
@@ -54,11 +63,11 @@ const Footer = () => {
             <ul className="flex flex-col gap-2.5 lg:gap-3 text-gray-400 text-[11px] sm:text-xs lg:text-sm">
               <li className="flex items-center gap-2">
                 <MessageCircle size={14} className="text-primary shrink-0" />
-                <span>+880 1234 567890</span>
+                <span>{contact.whatsapp}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail size={14} className="text-primary shrink-0" />
-                <span>hello@naharcraft.com</span>
+                <span>{contact.email}</span>
               </li>
               <li className="mt-3 lg:mt-4">
                 <p className="text-[10px] sm:text-xs text-gray-500 mb-1.5">আমাদের নিউজলেটারে সাবস্ক্রাইব করুন</p>
@@ -80,10 +89,16 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-5 lg:pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-gray-400 text-[10px] sm:text-xs">
           <p>© {new Date().getFullYear()} NaharCraft. সর্বস্বত্ব সংরক্ষিত।</p>
-          <p className="flex items-center gap-1.5 text-gray-400">
-            <span>Made by</span>
-            <span className="text-gray-200 font-medium tracking-wide">Shahjalal Ahmed</span>
-          </p>
+          <div className="flex items-center gap-4">
+            <Link to="/admin" className="hover:text-primary transition-colors flex items-center gap-1 text-[11px]">
+              <ShieldCheck size={12} />
+              <span>মালিকের অ্যাডমিন প্যানেল</span>
+            </Link>
+            <p className="flex items-center gap-1.5 text-gray-400">
+              <span>Made by</span>
+              <span className="text-gray-200 font-medium tracking-wide">Shahjalal Ahmed</span>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

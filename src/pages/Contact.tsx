@@ -3,8 +3,12 @@ import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send, MessageCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useData } from '../context/DataContext';
 
 const Contact = () => {
+  const { contact } = useData();
+  const whatsappNumber = contact.whatsapp.replace(/[^0-9]/g, '');
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -39,7 +43,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-bold">ফোন</h3>
-                  <p className="text-gray-500">+880 1234 567890</p>
+                  <p className="text-gray-500 font-mono text-sm">{contact.phone}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 mb-6">
@@ -48,7 +52,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-bold">ইমেইল</h3>
-                  <p className="text-gray-500">hello@naharcraft.com</p>
+                  <p className="text-gray-500 text-sm">{contact.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -57,7 +61,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-bold">অবস্থান</h3>
-                  <p className="text-gray-500">ঢাকা, বাংলাদেশ</p>
+                  <p className="text-gray-500 text-sm">{contact.address}</p>
                 </div>
               </div>
             </div>
@@ -66,7 +70,7 @@ const Contact = () => {
               <h3 className="text-xl font-bold mb-4">দ্রুত সহায়তা</h3>
               <p className="opacity-90 mb-6">দ্রুত সমাধান চান? হোয়াটসঅ্যাপের মাধ্যমে আমাদের সাথে যুক্ত হন।</p>
               <a 
-                href="https://wa.me/8801234567890" 
+                href={`https://wa.me/${whatsappNumber}`}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 bg-white text-accent-green py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all"

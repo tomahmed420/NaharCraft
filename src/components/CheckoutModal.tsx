@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, MessageCircle, MapPin, Truck, ShieldCheck, CheckCircle2, User, Phone, Home, FileText, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { INITIAL_CONTENT } from '../data/content';
+import { useData } from '../context/DataContext';
 import { cn } from '../lib/utils';
 
 interface CheckoutModalProps {
@@ -12,6 +12,7 @@ interface CheckoutModalProps {
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
   const { cart, totalPrice, clearCart } = useCart();
+  const { contact, settings } = useData();
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -21,8 +22,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const isFreeDelivery = totalPrice >= 1000;
-  const deliveryCharge = isFreeDelivery ? 0 : deliveryArea === 'inside' ? 70 : 130;
+  const insideRate = settings.insideDhakaDelivery ?? 70;
+  const outsideRate = settings.outsideDhakaDelivery ?? 130;
+  const freeThreshold = settings.freeDeliveryThreshold ?? 1000;
+
+  const isFreeDelivery = totalPrice >= freeThreshold;
+  const deliveryCharge = isFreeDelivery ? 0 : deliveryArea === 'inside' ? insideRate : outsideRate;
   const grandTotal = totalPrice + deliveryCharge;
 
   const validate = () => {
@@ -71,7 +76,7 @@ ${itemsText}
 ${notes.trim() ? `• বিশেষ নোট: ${notes.trim()}\n` : ''}━━━━━━━━━━━━━━━━━━━
 দয়া করে আমার এই অর্ডারটি গ্রহণ ও কনফার্ম করুন। ধন্যবাদ!`;
 
-    const whatsappNumber = INITIAL_CONTENT.contact.whatsapp.replace(/[^0-9]/g, '');
+    const whatsappNumber = contact.whatsapp.replace(/[^0-9]/g, '');
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
 
@@ -189,7 +194,7 @@ ${notes.trim() ? `• বিশেষ নোট: ${notes.trim()}\n` : ''}━━�
                     >
                       <p className="text-xs font-bold text-gray-900">ঢাকা মেট্রো</p>
                       <p className="text-[11px] text-gray-500 mt-0.5">
-                        চার্জ: {isFreeDelivery ? <span className="text-emerald-600 font-bold">ফ্রি (৳০)</span> : '৳৭০'}
+                        চার্জ: {isFreeDelivery ? <span className="text-emerald-600 font-bold">ফ্রি (৳০)</span> : `৳${insideRate}`}
                       </p>
                     </button>
 
@@ -205,7 +210,7 @@ ${notes.trim() ? `• বিশেষ নোট: ${notes.trim()}\n` : ''}━━�
                     >
                       <p className="text-xs font-bold text-gray-900">ঢাকার বাইরে (সারা দেশ)</p>
                       <p className="text-[11px] text-gray-500 mt-0.5">
-                        চার্জ: {isFreeDelivery ? <span className="text-emerald-600 font-bold">ফ্রি (৳০)</span> : '৳১৩০'}
+                        চার্জ: {isFreeDelivery ? <span className="text-emerald-600 font-bold">ফ্রি (৳০)</span> : `৳${outsideRate}`}
                       </p>
                     </button>
                   </div>
@@ -213,7 +218,7 @@ ${notes.trim() ? `• বিশেষ নোট: ${notes.trim()}\n` : ''}━━�
                   {isFreeDelivery && (
                     <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5">
                       <ShieldCheck size={14} />
-                      <span>অভিনন্দন! ১০০০+ টাকার অর্ডারে ডেলিভারি চার্জ সম্পূর্ণ ফ্রি।</span>
+                      <span>অভিনন্দন! ৳{freeThreshold}+ টাকার অর্ডারে ডেলিভারি চার্জ সম্পূর্ণ ফ্রি।</span>
                     </div>
                   )}
                 </div>

@@ -3,17 +3,17 @@ import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, MessageCircle, ChevronRight, Check, ArrowLeft, Plus, Minus, Zap, ShoppingBag } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { PRODUCTS } from '../data/products';
 import { useCart } from '../context/CartContext';
-import { INITIAL_CONTENT } from '../data/content';
+import { useData } from '../context/DataContext';
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { addToCart, openCart } = useCart();
+  const { products, contact } = useData();
   const [isAdded, setIsAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const product = PRODUCTS.find(p => String(p.id) === id);
+  const product = products.find(p => String(p.id) === id);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -46,7 +46,7 @@ const ProductDetails = () => {
     openCart();
   };
 
-  const whatsappNumber = INITIAL_CONTENT.contact.whatsapp.replace(/[^0-9]/g, '');
+  const whatsappNumber = contact.whatsapp.replace(/[^0-9]/g, '');
   const whatsappMessage = encodeURIComponent(
     `হ্যালো! আমি NaharCraft থেকে "${product.name}" (পরিমাণ: ${quantity} টি, মূল্য: ৳${product.price * quantity}) অর্ডার/বিস্তারিত জানতে আগ্রহী।`
   );
