@@ -11,7 +11,7 @@ const ProductDetails = () => {
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
-  const product = PRODUCTS.find(p => p.id === id);
+  const product = PRODUCTS.find(p => String(p.id) === id);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -48,7 +48,7 @@ const ProductDetails = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 pt-24 sm:pt-28 pb-12 sm:pb-16">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8">
           <Link to="/" className="hover:text-primary transition-colors">হোম</Link>

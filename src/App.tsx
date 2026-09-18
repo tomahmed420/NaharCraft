@@ -10,15 +10,21 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CategoryGrid from './components/CategoryGrid';
 import FeaturedProducts from './components/FeaturedProducts';
-import OurStorySection from './components/OurStorySection';
+import OfferBanner from './components/OfferBanner';
+import FAQSection from './components/FAQSection';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 
 // Pages
 import Shop from './pages/Shop';
 import Contact from './pages/Contact';
 import OurStoryPage from './pages/OurStory';
 import ProductDetails from './pages/ProductDetails';
+import ShippingPolicy from './pages/ShippingPolicy';
+import ReturnPolicy from './pages/ReturnPolicy';
+import FAQPage from './pages/FAQPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Admin Components
 import AdminLayout from './pages/admin/AdminLayout';
@@ -35,7 +41,8 @@ const Home = () => {
       <Hero content={INITIAL_CONTENT.hero} />
       <CategoryGrid categories={CATEGORIES} />
       <FeaturedProducts products={PRODUCTS} />
-      <OurStorySection content={INITIAL_CONTENT.ourStory} />
+      <OfferBanner />
+      <FAQSection />
       <Testimonials testimonials={TESTIMONIALS} />
       <Footer />
     </div>
@@ -49,6 +56,7 @@ export default function App() {
   return (
     <CartProvider>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* Frontend Routes */}
           <Route path="/" element={<Home />} />
@@ -56,6 +64,10 @@ export default function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/our-story" element={<OurStoryPage />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/shipping" element={<ShippingPolicy />} />
+          <Route path="/returns" element={<ReturnPolicy />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />

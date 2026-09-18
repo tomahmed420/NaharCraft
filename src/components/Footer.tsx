@@ -32,20 +32,21 @@ const Footer = () => {
           {/* Links Sections (2 Columns on mobile to save vertical space) */}
           <div className="col-span-1 lg:col-span-2 grid grid-cols-2 gap-4 sm:gap-8">
             <div>
-              <h4 className="text-sm sm:text-base lg:text-lg font-bold mb-3 lg:mb-5 text-gray-100">দ্রুত লিঙ্কসমূহ</h4>
+              <h4 className="text-sm sm:text-base lg:text-lg font-bold mb-3 lg:mb-5 text-gray-100">Quick Links</h4>
               <ul className="flex flex-col gap-2 lg:gap-3 text-gray-400 text-[11px] sm:text-xs lg:text-sm">
-                <li><Link to="/shop" className="hover:text-primary transition-colors">শপ</Link></li>
-                <li><Link to="/our-story" className="hover:text-primary transition-colors">আমাদের গল্প</Link></li>
-                <li><Link to="/contact" className="hover:text-primary transition-colors">যোগাযোগ</Link></li>
+                <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Shop</Link></li>
+                <li><Link to="/our-story" className="hover:text-primary transition-colors">About Us</Link></li>
+                <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-sm sm:text-base lg:text-lg font-bold mb-3 lg:mb-5 text-gray-100">কাস্টমার কেয়ার</h4>
+              <h4 className="text-sm sm:text-base lg:text-lg font-bold mb-3 lg:mb-5 text-gray-100">Customer Care</h4>
               <ul className="flex flex-col gap-2 lg:gap-3 text-gray-400 text-[11px] sm:text-xs lg:text-sm">
-                <li><a href="#" className="hover:text-primary transition-colors">শিপিং তথ্য</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">রিটার্ন ও এক্সচেঞ্জ</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">এফএকিউ (FAQ)</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">গোপনীয়তা নীতি</a></li>
+                <li><Link to="/shipping" className="hover:text-primary transition-colors">Shipping & Delivery</Link></li>
+                <li><Link to="/returns" className="hover:text-primary transition-colors">Return & Exchange</Link></li>
+                <li><Link to="/faq" className="hover:text-primary transition-colors">FAQs</Link></li>
+                <li><Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
@@ -80,8 +81,12 @@ const Footer = () => {
         </div>
         
         {/* Bottom Bar */}
-        <div className="pt-5 lg:pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-3 text-gray-500 text-[9px] sm:text-[10px] lg:text-xs">
-          <p>© {new Date().getFullYear()} NaharCraft. সর্বস্বত্ব সংরক্ষিত। ❤️</p>
+        <div className="pt-5 lg:pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-gray-400 text-[10px] sm:text-xs">
+          <p>© {new Date().getFullYear()} NaharCraft. সর্বস্বত্ব সংরক্ষিত।</p>
+          <p className="flex items-center gap-1.5 text-gray-400">
+            <span>Made by</span>
+            <span className="text-gray-200 font-medium tracking-wide">Shahjalal Ahmed</span>
+          </p>
         </div>
       </div>
     </footer>

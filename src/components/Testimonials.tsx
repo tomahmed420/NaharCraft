@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Star, ChevronLeft, ChevronRight, BadgeCheck, Quote } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Testimonial } from '../types';
 
 interface TestimonialsProps {
@@ -136,17 +136,13 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
               transition={{ duration: 0.3 }}
               className="bg-white p-5 rounded-2xl shadow-2xs border border-amber-900/10 flex flex-col justify-between"
             >
-              {/* Rating + Verified Badge */}
+              {/* Rating */}
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex gap-0.5">
                   {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
                     <Star key={i} size={14} fill="#E67E22" className="text-primary" />
                   ))}
                 </div>
-                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
-                  <BadgeCheck size={12} className="text-emerald-600" />
-                  যাচাইকৃত ক্রেতা
-                </span>
               </div>
 
               {/* Review Text */}
@@ -180,17 +176,13 @@ const Testimonials = ({ testimonials }: TestimonialsProps) => {
                 className="bg-white p-5 lg:p-6 rounded-2xl shadow-2xs hover:shadow-md transition-all duration-300 border border-amber-900/10 flex flex-col justify-between relative group"
               >
                 <div>
-                  {/* Rating + Verified Badge */}
+                  {/* Rating */}
                   <div className="flex items-center justify-between mb-2.5">
                     <div className="flex gap-0.5">
                       {[...Array(t.rating)].map((_, i) => (
                         <Star key={i} size={14} fill="#E67E22" className="text-primary" />
                       ))}
                     </div>
-                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full font-medium">
-                      <BadgeCheck size={11} className="text-emerald-600" />
-                      যাচাইকৃত
-                    </span>
                   </div>
 
                   {/* Compact Review Quote */}

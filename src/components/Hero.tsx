@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { HeroContent } from '../types';
 import { cn } from '../lib/utils';
 
@@ -45,7 +46,8 @@ const Hero = ({ content }: HeroProps) => {
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/40" />
+          {/* Subtle gradient vignette to ensure top navbar and middle text always pop */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/35 to-black/65" />
         </motion.div>
       </AnimatePresence>
 
@@ -54,7 +56,7 @@ const Hero = ({ content }: HeroProps) => {
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold mb-4 sm:mb-6 max-w-4xl leading-tight pointer-events-auto"
+          className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold mb-4 sm:mb-6 max-w-4xl leading-tight pointer-events-auto drop-shadow-sm"
         >
           {content.title}
         </motion.h1>
@@ -62,18 +64,24 @@ const Hero = ({ content }: HeroProps) => {
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="text-sm sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-xs sm:max-w-xl md:max-w-2xl opacity-90 px-2 sm:px-0 pointer-events-auto leading-relaxed"
+          className="text-sm sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-xs sm:max-w-xl md:max-w-2xl opacity-90 px-2 sm:px-0 pointer-events-auto leading-relaxed drop-shadow-xs"
         >
           {content.subtitle}
         </motion.p>
-        <motion.button 
+        <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.9 }}
-          className="bg-primary text-white px-8 sm:px-10 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-opacity-90 transition-all shadow-lg pointer-events-auto"
+          className="pointer-events-auto"
         >
-          {content.buttonText}
-        </motion.button>
+          <Link 
+            to="/shop"
+            className="inline-flex items-center gap-2.5 bg-primary hover:bg-primary/90 text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl text-base sm:text-lg font-medium transition-all shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <span>{content.buttonText}</span>
+            <ArrowRight size={18} />
+          </Link>
+        </motion.div>
       </div>
 
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-20">
