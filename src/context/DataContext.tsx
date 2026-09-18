@@ -352,8 +352,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       const { data: inserted, error } = await supabase.from('products').insert([supaPayload]).select();
       
       if (error) {
-        console.error('Supabase RLS or Insert Error:', error.message);
-        alert('Data save failed: Please disable RLS for products table in Supabase.');
+        console.error('Supabase Insert Error:', error.message);
       } else if (inserted && inserted[0]) {
         // Update local ID to actual UUID from Supabase
         setData(prev => ({
@@ -392,7 +391,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase.from('products').update(supaPayload).eq('id', id);
       if (error) {
         console.error('Supabase Update Error:', error.message);
-        alert('Update failed: Please disable RLS in Supabase.');
       }
     } catch (e) {
       console.error('Failed to update product in Supabase:', e);
@@ -411,7 +409,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) {
         console.error('Supabase Delete Error:', error.message);
-        alert('Delete failed: Please disable RLS in Supabase.');
       }
     } catch (e) {
       console.error('Failed to delete product from Supabase:', e);
@@ -430,7 +427,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const { error } = await supabase.from('products').update({ stock: newInStock ? 10 : 0 }).eq('id', id);
-      if (error) alert('Update failed: Please disable RLS in Supabase.');
     } catch (e) {}
   };
 
@@ -446,7 +442,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const { error } = await supabase.from('products').update({ featured: newFeatured }).eq('id', id);
-      if (error) alert('Update failed: Please disable RLS in Supabase.');
     } catch (e) {}
   };
 
@@ -469,7 +464,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       const { data: inserted, error } = await supabase.from('categories').insert([supaPayload]).select();
       if (error) {
         console.error('Supabase Cat Error:', error.message);
-        alert('Category save failed: Please disable RLS for categories in Supabase.');
       } else if (inserted && inserted[0]) {
         setData(prev => ({
           ...prev,
@@ -493,7 +487,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (updated.image !== undefined) supaPayload.image_url = updated.image;
       
       const { error } = await supabase.from('categories').update(supaPayload).eq('id', id);
-      if (error) alert('Category update failed: Please disable RLS in Supabase.');
+      if (error) console.error('Category update failed:', error.message);
     } catch (e) {
       console.error('Failed to update category in Supabase:', e);
     }
@@ -507,7 +501,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const { error } = await supabase.from('categories').delete().eq('id', id);
-      if (error) alert('Category delete failed: Please disable RLS in Supabase.');
+      if (error) console.error('Category delete failed:', error.message);
     } catch (e) {
       console.error('Failed to delete category from Supabase:', e);
     }
