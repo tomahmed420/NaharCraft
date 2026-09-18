@@ -132,7 +132,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchFromSupabase = async () => {
       try {
-        // Fetch categories first to map IDs to names
+        // Fetch categories first
         let mappedCats: any[] = [];
         const { data: supaCats, error: catError } = await supabase.from('categories').select('*');
         if (!catError && supaCats && supaCats.length > 0) {
@@ -163,8 +163,44 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           });
           setData(prev => ({ ...prev, products: mappedProducts as any }));
         }
+
+        // Fetch FAQs
+        const { data: supaFaqs, error: faqError } = await supabase.from('faqs').select('*');
+        if (!faqError && supaFaqs) {
+          setData(prev => ({ ...prev, faqs: supaFaqs }));
+        }
+
+        // Fetch Testimonials
+        const { data: supaTestimonials, error: testError } = await supabase.from('testimonials').select('*');
+        if (!testError && supaTestimonials) {
+          setData(prev => ({ ...prev, testimonials: supaTestimonials }));
+        }
+
+        // Fetch Admins
+        const { data: supaAdmins, error: adminError } = await supabase.from('admins').select('*');
+        if (!adminError && supaAdmins && supaAdmins.length > 0) {
+          setData(prev => ({ ...prev, admins: supaAdmins }));
+        }
+
+        // Fetch Site Content
+        const { data: supaContent, error: contentError } = await supabase.from('site_content').select('*');
+        if (!contentError && supaContent) {
+          const contentMap: any = {};
+          supaContent.forEach(item => {
+            contentMap[item.key] = item.content;
+          });
+          
+          setData(prev => ({
+            ...prev,
+            hero: contentMap.hero || prev.hero,
+            promos: contentMap.promos || prev.promos,
+            ourStory: contentMap.ourStory || prev.ourStory,
+            contact: contentMap.contact || prev.contact,
+            settings: contentMap.settings || prev.settings
+          }));
+        }
       } catch (err) {
-        console.error('Supabase fetch failed, falling back to local data', err);
+        console.error('Supabase fetch failed:', err);
       }
     };
     fetchFromSupabase();
@@ -247,7 +283,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(SESSION_KEY);
   };
 
-  const addAdmin = (newAdmin: Omit<AdminUser, 'id' | 'createdAt'>): { success: boolean; message?: string } => {
+  const addAdmin = async (newAdmin: Omit<AdminUser, 'id' | 'createdAt'>): Promise<{ success: boolean; message?: string }> => {
     const cleanUsername = newAdmin.username.trim();
     if (!cleanUsername) {
       return { success: false, message: 'ইউজারনেম বা ইমেইল প্রদান করুন।' };
@@ -261,9 +297,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       return { success: false, message: 'এই ইউজারনেম দিয়ে ইতিমধ্যে একজন অ্যাডমিন রয়েছেন।' };
     }
 
+    const tempId = 'admin_' + Date.now();
     const created: AdminUser = {
       ...newAdmin,
-      id: 'admin_' + Date.now(),
+      id: tempId,
       username: cleanUsername,
       createdAt: new Date().toISOString().slice(0, 10),
       status: newAdmin.status || 'active'
@@ -274,10 +311,29 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       admins: [...prev.admins, created]
     }));
 
+    try {
+      const { data: inserted, error } = await supabase.from('admins').insert([
+        { 
+          name: newAdmin.name, 
+          username: cleanUsername, 
+          password: newAdmin.password, 
+          role: newAdmin.role, 
+          status: newAdmin.status || 'active' 
+        }
+      ]).select();
+      
+      if (!error && inserted && inserted[0]) {
+        setData(prev => ({
+          ...prev,
+          admins: prev.admins.map(a => a.id === tempId ? inserted[0] : a)
+        }));
+      }
+    } catch (e) {}
+
     return { success: true };
   };
 
-  const updateAdmin = (id: string, updated: Partial<AdminUser>): { success: boolean; message?: string } => {
+  const updateAdmin = async (id: string, updated: Partial<AdminUser>): Promise<{ success: boolean; message?: string }> => {
     // If username is being changed, check uniqueness
     if (updated.username) {
       const clean = updated.username.trim();
@@ -293,10 +349,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       admins: prev.admins.map(a => (a.id === id ? { ...a, ...updated } : a))
     }));
 
+    try {
+      await supabase.from('admins').update(updated).eq('id', id);
+    } catch (e) {}
+
     return { success: true };
   };
 
-  const deleteAdmin = (id: string): { success: boolean; message?: string } => {
+  const deleteAdmin = async (id: string): Promise<{ success: boolean; message?: string }> => {
     const target = data.admins.find(a => a.id === id);
     if (!target) {
       return { success: false, message: 'অ্যাডমিন পাওয়া যায়নি।' };
@@ -319,6 +379,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       ...prev,
       admins: prev.admins.filter(a => a.id !== id)
     }));
+
+    try {
+      await supabase.from('admins').delete().eq('id', id);
+    } catch (e) {}
 
     return { success: true };
   };
@@ -508,95 +572,141 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Content Operations
-  const updateHero = (hero: Partial<HeroContent>) => {
+  const updateHero = async (hero: Partial<HeroContent>) => {
+    const newHero = { ...data.hero, ...hero };
     setData(prev => ({
       ...prev,
-      hero: { ...prev.hero, ...hero }
+      hero: newHero
     }));
+    try {
+      await supabase.from('site_content').upsert({ key: 'hero', content: newHero });
+    } catch (e) {}
   };
 
-  const updatePromos = (promos: Partial<PromoBanners>) => {
+  const updatePromos = async (promos: Partial<PromoBanners>) => {
+    const newPromos = {
+      ...data.promos,
+      ...promos,
+      banner1: { ...(data.promos?.banner1 || {}), ...(promos.banner1 || {}) },
+      banner2: { ...(data.promos?.banner2 || {}), ...(promos.banner2 || {}) }
+    };
     setData(prev => ({
       ...prev,
-      promos: {
-        ...prev.promos,
-        ...promos,
-        banner1: { ...prev.promos.banner1, ...(promos.banner1 || {}) },
-        banner2: { ...prev.promos.banner2, ...(promos.banner2 || {}) }
-      }
+      promos: newPromos as any
     }));
+    try {
+      await supabase.from('site_content').upsert({ key: 'promos', content: newPromos });
+    } catch (e) {}
   };
 
-  const updateOurStory = (story: Partial<OurStoryContent>) => {
+  const updateOurStory = async (story: Partial<OurStoryContent>) => {
+    const newStory = { ...data.ourStory, ...story };
     setData(prev => ({
       ...prev,
-      ourStory: { ...prev.ourStory, ...story }
+      ourStory: newStory
     }));
+    try {
+      await supabase.from('site_content').upsert({ key: 'ourStory', content: newStory });
+    } catch (e) {}
   };
 
-  const updateContact = (contact: Partial<ContactContent>) => {
+  const updateContact = async (contact: Partial<ContactContent>) => {
+    const newContact = { ...data.contact, ...contact };
     setData(prev => ({
       ...prev,
-      contact: { ...prev.contact, ...contact }
+      contact: newContact
     }));
+    try {
+      await supabase.from('site_content').upsert({ key: 'contact', content: newContact });
+    } catch (e) {}
   };
 
   // FAQ Operations
-  const addFAQ = (newFaq: Omit<FAQItem, 'id'>) => {
-    setData(prev => {
-      const newId = String(Date.now());
-      return {
-        ...prev,
-        faqs: [...prev.faqs, { ...newFaq, id: newId }]
-      };
-    });
+  const addFAQ = async (newFaq: Omit<FAQItem, 'id'>) => {
+    const tempId = String(Date.now());
+    setData(prev => ({
+      ...prev,
+      faqs: [...prev.faqs, { ...newFaq, id: tempId }]
+    }));
+    try {
+      const { data: inserted, error } = await supabase.from('faqs').insert([newFaq]).select();
+      if (!error && inserted && inserted[0]) {
+        setData(prev => ({
+          ...prev,
+          faqs: prev.faqs.map(f => f.id === tempId ? inserted[0] : f)
+        }));
+      }
+    } catch (e) {}
   };
 
-  const updateFAQ = (id: string, updated: Partial<FAQItem>) => {
+  const updateFAQ = async (id: string, updated: Partial<FAQItem>) => {
     setData(prev => ({
       ...prev,
       faqs: prev.faqs.map(f => (f.id === id ? { ...f, ...updated } : f))
     }));
+    try {
+      await supabase.from('faqs').update(updated).eq('id', id);
+    } catch (e) {}
   };
 
-  const deleteFAQ = (id: string) => {
+  const deleteFAQ = async (id: string) => {
     setData(prev => ({
       ...prev,
       faqs: prev.faqs.filter(f => f.id !== id)
     }));
+    try {
+      await supabase.from('faqs').delete().eq('id', id);
+    } catch (e) {}
   };
 
   // Testimonial Operations
-  const addTestimonial = (newTestimonial: Omit<Testimonial, 'id'>) => {
-    setData(prev => {
-      const newId = prev.testimonials.length > 0 ? Math.max(...prev.testimonials.map(t => t.id)) + 1 : 1;
-      return {
-        ...prev,
-        testimonials: [{ ...newTestimonial, id: newId }, ...prev.testimonials]
-      };
-    });
+  const addTestimonial = async (newTestimonial: Omit<Testimonial, 'id'>) => {
+    const tempId = Date.now();
+    setData(prev => ({
+      ...prev,
+      testimonials: [{ ...newTestimonial, id: tempId }, ...prev.testimonials]
+    }));
+    try {
+      const { data: inserted, error } = await supabase.from('testimonials').insert([newTestimonial]).select();
+      if (!error && inserted && inserted[0]) {
+        setData(prev => ({
+          ...prev,
+          testimonials: prev.testimonials.map(t => t.id === tempId ? inserted[0] : t)
+        }));
+      }
+    } catch (e) {}
   };
 
-  const updateTestimonial = (id: number, updated: Partial<Testimonial>) => {
+  const updateTestimonial = async (id: number | string, updated: Partial<Testimonial>) => {
     setData(prev => ({
       ...prev,
       testimonials: prev.testimonials.map(t => (t.id === id ? { ...t, ...updated } : t))
     }));
+    try {
+      await supabase.from('testimonials').update(updated).eq('id', id);
+    } catch (e) {}
   };
 
-  const deleteTestimonial = (id: number) => {
+  const deleteTestimonial = async (id: number | string) => {
     setData(prev => ({
       ...prev,
       testimonials: prev.testimonials.filter(t => t.id !== id)
     }));
+    try {
+      await supabase.from('testimonials').delete().eq('id', id);
+    } catch (e) {}
   };
 
   // Settings
-  const updateSettings = (settings: Partial<SiteSettings>) => {
+  const updateSettings = async (settings: Partial<SiteSettings>) => {
+    const newSettings = { ...data.settings!, ...settings };
     setData(prev => ({
       ...prev,
-      settings: { ...prev.settings, ...settings }
+      settings: newSettings
     }));
+    try {
+      await supabase.from('site_content').upsert({ key: 'settings', content: newSettings });
+    } catch (e) {}
   };
 
   // Factory Reset
