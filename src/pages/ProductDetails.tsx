@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShoppingCart, MessageCircle, ChevronRight, Check, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, MessageCircle, ChevronRight, Check, ArrowLeft, Plus, Minus, Zap, ShoppingBag } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { PRODUCTS } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { INITIAL_CONTENT } from '../data/content';
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const product = PRODUCTS.find(p => String(p.id) === id);
 
@@ -34,15 +36,21 @@ const ProductDetails = () => {
   }
 
   const handleAddToCart = () => {
-    addToCart(product);
+    addToCart(product, quantity);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1500);
   };
 
+  const handleOrderNow = () => {
+    addToCart(product, quantity);
+    openCart();
+  };
+
+  const whatsappNumber = INITIAL_CONTENT.contact.whatsapp.replace(/[^0-9]/g, '');
   const whatsappMessage = encodeURIComponent(
-    `হ্যালো! আমি NaharCraft থেকে "${product.name}" (মূল্য: ৳${product.price}) অর্ডার/বিস্তারিত জানতে আগ্রহী।`
+    `হ্যালো! আমি NaharCraft থেকে "${product.name}" (পরিমাণ: ${quantity} টি, মূল্য: ৳${product.price * quantity}) অর্ডার/বিস্তারিত জানতে আগ্রহী।`
   );
-  const whatsappUrl = `https://wa.me/8801234567890?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -110,33 +118,77 @@ const ProductDetails = () => {
                 </ul>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto">
+              {/* Quantity Picker & Total Preview */}
+              <div className="mb-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-gray-700">পরিমাণ:</span>
+                  <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50/50 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                      className="w-8 h-8 rounded-lg bg-white shadow-xs flex items-center justify-center text-gray-600 hover:text-primary transition-colors disabled:opacity-50"
+                      disabled={quantity <= 1}
+                    >
+                      <Minus size={15} />
+                    </button>
+                    <span className="w-10 text-center font-bold text-gray-900 text-sm">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(prev => prev + 1)}
+                      className="w-8 h-8 rounded-lg bg-white shadow-xs flex items-center justify-center text-gray-600 hover:text-primary transition-colors"
+                    >
+                      <Plus size={15} />
+                    </button>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-gray-500 block">মোট মূল্য</span>
+                  <span className="text-lg sm:text-xl font-bold text-primary">৳{product.price * quantity}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3 mt-auto">
+                {/* Primary Button: Order Now (Opens Side Cart Drawer) */}
                 <button 
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-primary text-white py-3.5 px-6 rounded-xl font-bold hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-md shadow-primary/20"
+                  onClick={handleOrderNow}
+                  className="w-full bg-primary text-white py-3.5 sm:py-4 px-6 rounded-xl font-bold hover:bg-opacity-90 transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] shadow-lg shadow-primary/20 text-base"
                 >
-                  {isAdded ? (
-                    <>
-                      <Check size={20} />
-                      <span>কার্টে যুক্ত হয়েছে</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart size={20} />
-                      <span>কার্টে যোগ করুন</span>
-                    </>
-                  )}
+                  <Zap size={20} className="fill-current text-amber-300" />
+                  <span>এখনই অর্ডার করুন</span>
                 </button>
-                
-                <a 
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#25D366] text-white py-3.5 px-6 rounded-xl font-bold hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-md shadow-[#25D366]/20"
-                >
-                  <MessageCircle size={20} />
-                  <span>হোয়াটসঅ্যাপ</span>
-                </a>
+
+                {/* Secondary Row: Add to Cart & WhatsApp */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={handleAddToCart}
+                    className="bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    {isAdded ? (
+                      <>
+                        <Check size={18} className="text-accent-green" />
+                        <span className="text-xs sm:text-sm text-accent-green">যুক্ত হয়েছে</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart size={18} className="text-gray-500" />
+                        <span className="text-xs sm:text-sm">কার্টে যোগ করুন</span>
+                      </>
+                    )}
+                  </button>
+                  
+                  <a 
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white border border-[#25D366]/30 py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    <MessageCircle size={18} />
+                    <span className="text-xs sm:text-sm">হোয়াটসঅ্যাপ</span>
+                  </a>
+                </div>
               </div>
               
               <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-center text-xs text-gray-400 gap-6">

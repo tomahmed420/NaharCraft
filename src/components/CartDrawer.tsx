@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cn } from '../lib/utils';
+import CheckoutModal from './CheckoutModal';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -11,6 +12,11 @@ interface CartDrawerProps {
 
 const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   const { cart, removeFromCart, updateQuantity, totalPrice, totalItems } = useCart();
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  const handleOpenCheckout = () => {
+    setIsCheckoutOpen(true);
+  };
 
   return (
     <AnimatePresence>
@@ -106,16 +112,25 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                   <span className="text-gray-500">সাবটোটাল</span>
                   <span className="text-2xl font-bold text-primary">৳{totalPrice}</span>
                 </div>
-                <button className="w-full bg-primary text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20">
-                  <span>চেকাউট</span>
+                <button 
+                  onClick={handleOpenCheckout}
+                  className="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 active:scale-[0.99]"
+                >
+                  <span>চেকআউট করুন (হোয়াটসঅ্যাপ)</span>
                   <ArrowRight size={20} />
                 </button>
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  শিপিং এবং ট্যাক্স চেকাউটের সময় হিসাব করা হবে
+                  ক্যাশ অন ডেলিভারি সুবিধা প্রযোজ্য
                 </p>
               </div>
             )}
           </motion.div>
+
+          {/* WhatsApp Checkout Modal */}
+          <CheckoutModal
+            isOpen={isCheckoutOpen}
+            onClose={() => setIsCheckoutOpen(false)}
+          />
         </>
       )}
     </AnimatePresence>

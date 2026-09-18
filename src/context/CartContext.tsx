@@ -7,28 +7,36 @@ interface CartItem extends Product {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const addToCart = (product: Product) => {
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+
+  const addToCart = (product: Product, quantity: number = 1) => {
+    const qtyToAdd = Math.max(1, quantity);
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
         return prev.map(item => 
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id ? { ...item, quantity: item.quantity + qtyToAdd } : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, quantity: qtyToAdd }];
     });
   };
 
@@ -59,7 +67,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       updateQuantity, 
       clearCart, 
       totalItems, 
-      totalPrice 
+      totalPrice,
+      isCartOpen,
+      openCart,
+      closeCart
     }}>
       {children}
     </CartContext.Provider>

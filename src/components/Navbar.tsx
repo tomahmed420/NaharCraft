@@ -9,8 +9,7 @@ import CartDrawer from './CartDrawer';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const { totalItems } = useCart();
+  const { totalItems, isCartOpen, openCart, closeCart } = useCart();
   const location = useLocation();
 
   const isHome = location.pathname === '/';
@@ -109,7 +108,7 @@ const Navbar = () => {
             </a>
 
             <button 
-              onClick={() => setIsCartOpen(true)}
+              onClick={openCart}
               aria-label="শপিং কার্ট"
               className={cn(
                 "w-9 h-9 sm:w-10 sm:h-10 rounded-full transition-all duration-500 flex items-center justify-center relative backdrop-blur-md border shadow-xs active:scale-95",
@@ -176,7 +175,7 @@ const Navbar = () => {
         </AnimatePresence>
       </nav>
 
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
     </>
   );
 };
