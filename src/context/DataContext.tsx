@@ -132,16 +132,36 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchFromSupabase = async () => {
       try {
+        // Fetch categories first to map IDs to names
+        let mappedCats: any[] = [];
+        const { data: supaCats, error: catError } = await supabase.from('categories').select('*');
+        if (!catError && supaCats && supaCats.length > 0) {
+          mappedCats = supaCats.map(c => ({
+            id: c.id,
+            name: c.name,
+            image: c.image_url || c.image || 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600&h=600'
+          }));
+          setData(prev => ({ ...prev, categories: mappedCats as any }));
+        }
+
         // Fetch products
         const { data: supaProducts, error: prodError } = await supabase.from('products').select('*');
         if (!prodError && supaProducts && supaProducts.length > 0) {
-          setData(prev => ({ ...prev, products: supaProducts as any }));
-        }
-
-        // Fetch categories
-        const { data: supaCats, error: catError } = await supabase.from('categories').select('*');
-        if (!catError && supaCats && supaCats.length > 0) {
-          setData(prev => ({ ...prev, categories: supaCats as any }));
+          const mappedProducts = supaProducts.map(p => {
+            const catName = mappedCats.find(c => c.id === p.category_id)?.name || 'Uncategorized';
+            return {
+              id: p.id,
+              name: p.name,
+              category: catName,
+              price: p.price,
+              image: (p.images && p.images.length > 0) ? p.images[0] : (p.image || 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600&h=600'),
+              description: p.description || '',
+              featured: Boolean(p.featured),
+              stock: p.stock || 0,
+              inStock: p.stock > 0 || p.is_published
+            };
+          });
+          setData(prev => ({ ...prev, products: mappedProducts as any }));
         }
       } catch (err) {
         console.error('Supabase fetch failed, falling back to local data', err);
@@ -305,7 +325,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   // Product Operations
   const addProduct = async (newProd: Omit<Product, 'id'>) => {
-    // Generate optimistic ID
     const newId = data.products.length > 0 ? Math.max(...data.products.map(p => Number(p.id) || 0)) + 1 : 1;
     const productToInsert = { ...newProd, id: newId, inStock: newProd.inStock !== false };
     
@@ -315,15 +334,39 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       products: [productToInsert, ...prev.products]
     }));
 
-    // Push to Supabase
+    // Push to Supabase (mapped to Lovable schema)
     try {
-      await supabase.from('products').insert([productToInsert]);
+      const catMatch = data.categories.find(c => c.name === newProd.category);
+      const supaPayload = {
+        name: newProd.name,
+        price: newProd.price,
+        description: newProd.description || '',
+        category_id: catMatch?.id || null,
+        images: [newProd.image],
+        featured: newProd.featured,
+        stock: newProd.inStock ? 10 : 0,
+        is_published: true,
+        slug: newProd.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now()
+      };
+      
+      const { data: inserted, error } = await supabase.from('products').insert([supaPayload]).select();
+      
+      if (error) {
+        console.error('Supabase RLS or Insert Error:', error.message);
+        alert('Data save failed: Please disable RLS for products table in Supabase.');
+      } else if (inserted && inserted[0]) {
+        // Update local ID to actual UUID from Supabase
+        setData(prev => ({
+          ...prev,
+          products: prev.products.map(p => p.id === newId ? { ...p, id: inserted[0].id } : p)
+        }));
+      }
     } catch (e) {
       console.error('Failed to sync new product to Supabase:', e);
     }
   };
 
-  const updateProduct = async (id: number, updated: Partial<Product>) => {
+  const updateProduct = async (id: number | string, updated: Partial<Product>) => {
     // Update local UI instantly
     setData(prev => ({
       ...prev,
@@ -332,13 +375,31 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     // Push to Supabase
     try {
-      await supabase.from('products').update(updated).eq('id', id);
+      let catMatchId = undefined;
+      if (updated.category) {
+        catMatchId = data.categories.find(c => c.name === updated.category)?.id;
+      }
+      
+      const supaPayload: any = {};
+      if (updated.name !== undefined) supaPayload.name = updated.name;
+      if (updated.price !== undefined) supaPayload.price = updated.price;
+      if (updated.description !== undefined) supaPayload.description = updated.description;
+      if (updated.featured !== undefined) supaPayload.featured = updated.featured;
+      if (updated.image !== undefined) supaPayload.images = [updated.image];
+      if (catMatchId !== undefined) supaPayload.category_id = catMatchId;
+      if (updated.inStock !== undefined) supaPayload.stock = updated.inStock ? 10 : 0;
+
+      const { error } = await supabase.from('products').update(supaPayload).eq('id', id);
+      if (error) {
+        console.error('Supabase Update Error:', error.message);
+        alert('Update failed: Please disable RLS in Supabase.');
+      }
     } catch (e) {
       console.error('Failed to update product in Supabase:', e);
     }
   };
 
-  const deleteProduct = async (id: number) => {
+  const deleteProduct = async (id: number | string) => {
     // Update local UI instantly
     setData(prev => ({
       ...prev,
@@ -347,13 +408,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     // Push to Supabase
     try {
-      await supabase.from('products').delete().eq('id', id);
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) {
+        console.error('Supabase Delete Error:', error.message);
+        alert('Delete failed: Please disable RLS in Supabase.');
+      }
     } catch (e) {
       console.error('Failed to delete product from Supabase:', e);
     }
   };
 
-  const toggleProductStock = async (id: number) => {
+  const toggleProductStock = async (id: number | string) => {
     const product = data.products.find(p => p.id === id);
     if (!product) return;
     const newInStock = !product.inStock;
@@ -364,11 +429,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     try {
-      await supabase.from('products').update({ inStock: newInStock }).eq('id', id);
+      const { error } = await supabase.from('products').update({ stock: newInStock ? 10 : 0 }).eq('id', id);
+      if (error) alert('Update failed: Please disable RLS in Supabase.');
     } catch (e) {}
   };
 
-  const toggleProductFeatured = async (id: number) => {
+  const toggleProductFeatured = async (id: number | string) => {
     const product = data.products.find(p => p.id === id);
     if (!product) return;
     const newFeatured = !product.featured;
@@ -379,7 +445,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     try {
-      await supabase.from('products').update({ featured: newFeatured }).eq('id', id);
+      const { error } = await supabase.from('products').update({ featured: newFeatured }).eq('id', id);
+      if (error) alert('Update failed: Please disable RLS in Supabase.');
     } catch (e) {}
   };
 
@@ -394,33 +461,53 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     try {
-      await supabase.from('categories').insert([catToInsert]);
+      const supaPayload = {
+        name: newCat.name,
+        image_url: newCat.image,
+        slug: newCat.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now()
+      };
+      const { data: inserted, error } = await supabase.from('categories').insert([supaPayload]).select();
+      if (error) {
+        console.error('Supabase Cat Error:', error.message);
+        alert('Category save failed: Please disable RLS for categories in Supabase.');
+      } else if (inserted && inserted[0]) {
+        setData(prev => ({
+          ...prev,
+          categories: prev.categories.map(c => c.id === newId ? { ...c, id: inserted[0].id } : c)
+        }));
+      }
     } catch (e) {
       console.error('Failed to sync new category to Supabase:', e);
     }
   };
 
-  const updateCategory = async (id: number, updated: Partial<Category>) => {
+  const updateCategory = async (id: number | string, updated: Partial<Category>) => {
     setData(prev => ({
       ...prev,
       categories: prev.categories.map(c => (c.id === id ? { ...c, ...updated } : c))
     }));
 
     try {
-      await supabase.from('categories').update(updated).eq('id', id);
+      const supaPayload: any = {};
+      if (updated.name !== undefined) supaPayload.name = updated.name;
+      if (updated.image !== undefined) supaPayload.image_url = updated.image;
+      
+      const { error } = await supabase.from('categories').update(supaPayload).eq('id', id);
+      if (error) alert('Category update failed: Please disable RLS in Supabase.');
     } catch (e) {
       console.error('Failed to update category in Supabase:', e);
     }
   };
 
-  const deleteCategory = async (id: number) => {
+  const deleteCategory = async (id: number | string) => {
     setData(prev => ({
       ...prev,
       categories: prev.categories.filter(c => c.id !== id)
     }));
 
     try {
-      await supabase.from('categories').delete().eq('id', id);
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (error) alert('Category delete failed: Please disable RLS in Supabase.');
     } catch (e) {
       console.error('Failed to delete category from Supabase:', e);
     }
