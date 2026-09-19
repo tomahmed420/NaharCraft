@@ -128,27 +128,30 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     return defaultState;
   });
 
-  // Fetch from Supabase on mount
+  // Fetch from Supabase on mount and keep synced
   useEffect(() => {
     const fetchFromSupabase = async () => {
       try {
         // Fetch categories first
         let mappedCats: any[] = [];
-        const { data: supaCats, error: catError } = await supabase.from('categories').select('*');
+        const { data: supaCats, error: catError } = await supabase.from('categories').select('*').order('created_at', { ascending: true });
         if (!catError && supaCats && supaCats.length > 0) {
           mappedCats = supaCats.map(c => ({
             id: c.id,
             name: c.name,
-            image: c.image_url || c.image || 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600&h=600'
+            image: c.image_url || c.image || 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600&h=600',
+            description: c.description || ''
           }));
           setData(prev => ({ ...prev, categories: mappedCats as any }));
         }
 
         // Fetch products
-        const { data: supaProducts, error: prodError } = await supabase.from('products').select('*');
+        const { data: supaProducts, error: prodError } = await supabase.from('products').select('*').order('created_at', { ascending: false });
         if (!prodError && supaProducts && supaProducts.length > 0) {
+          const effectiveCats = mappedCats.length > 0 ? mappedCats : CATEGORIES;
           const mappedProducts = supaProducts.map(p => {
-            const catName = mappedCats.find(c => c.id === p.category_id)?.name || 'Uncategorized';
+            const foundCat = effectiveCats.find(c => c.id === p.category_id);
+            const catName = foundCat ? foundCat.name : (p.category || 'অন্যান্য');
             return {
               id: p.id,
               name: p.name,
@@ -157,8 +160,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
               image: (p.images && p.images.length > 0) ? p.images[0] : (p.image || 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=600&h=600'),
               description: p.description || '',
               featured: Boolean(p.featured),
-              stock: p.stock || 0,
-              inStock: p.stock > 0 || p.is_published
+              stock: p.stock ?? 10,
+              inStock: (p.stock === undefined || p.stock > 0) && p.is_published !== false
             };
           });
           setData(prev => ({ ...prev, products: mappedProducts as any }));
@@ -203,7 +206,35 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         console.error('Supabase fetch failed:', err);
       }
     };
+
     fetchFromSupabase();
+
+    // Listen to focus and visibility changes so device always gets latest data
+    const handleFocus = () => {
+      fetchFromSupabase();
+    };
+    window.addEventListener('focus', handleFocus);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchFromSupabase();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // Subscribe to realtime database changes on products & categories
+    const realtimeChannel = supabase
+      .channel('realtime_sync_channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        fetchFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
+        fetchFromSupabase();
+      })
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      supabase.removeChannel(realtimeChannel);
+    };
   }, []);
 
   // Current logged in admin session
@@ -387,10 +418,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     return { success: true };
   };
 
+  // Helper to verify valid UUID format for PostgreSQL
+  const isUUID = (val: any) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
   // Product Operations
   const addProduct = async (newProd: Omit<Product, 'id'>) => {
-    const newId = data.products.length > 0 ? Math.max(...data.products.map(p => Number(p.id) || 0)) + 1 : 1;
-    const productToInsert = { ...newProd, id: newId, inStock: newProd.inStock !== false };
+    const tempId = 'temp_' + Date.now();
+    const productToInsert = { ...newProd, id: tempId, inStock: newProd.inStock !== false };
     
     // Update local UI instantly
     setData(prev => ({
@@ -400,28 +434,40 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     // Push to Supabase (mapped to Lovable schema)
     try {
-      const catMatch = data.categories.find(c => c.name === newProd.category);
+      // Find category UUID
+      let supaCategoryId: string | null = null;
+      if (newProd.category) {
+        const catMatch = data.categories.find(c => c.name.trim().toLowerCase() === newProd.category.trim().toLowerCase());
+        if (catMatch && isUUID(catMatch.id)) {
+          supaCategoryId = String(catMatch.id);
+        }
+      }
+
       const supaPayload = {
-        name: newProd.name,
-        price: newProd.price,
+        name: newProd.name.trim(),
+        price: Number(newProd.price) || 0,
         description: newProd.description || '',
-        category_id: catMatch?.id || null,
-        images: [newProd.image],
-        featured: newProd.featured,
-        stock: newProd.inStock ? 10 : 0,
+        category_id: supaCategoryId,
+        images: [newProd.image.trim()],
+        featured: Boolean(newProd.featured),
+        stock: newProd.inStock !== false ? (newProd.stock || 10) : 0,
         is_published: true,
-        slug: newProd.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now()
+        slug: (newProd.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'item') + '-' + Date.now()
       };
       
       const { data: inserted, error } = await supabase.from('products').insert([supaPayload]).select();
       
       if (error) {
-        console.error('Supabase Insert Error:', error.message);
+        console.error('Supabase Product Insert Error:', error.message);
       } else if (inserted && inserted[0]) {
         // Update local ID to actual UUID from Supabase
         setData(prev => ({
           ...prev,
-          products: prev.products.map(p => p.id === newId ? { ...p, id: inserted[0].id } : p)
+          products: prev.products.map(p => p.id === tempId ? { 
+            ...p, 
+            id: inserted[0].id,
+            category: newProd.category 
+          } : p)
         }));
       }
     } catch (e) {
@@ -438,23 +484,29 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     // Push to Supabase
     try {
-      let catMatchId = undefined;
-      if (updated.category) {
-        catMatchId = data.categories.find(c => c.name === updated.category)?.id;
+      let supaCategoryId: string | null | undefined = undefined;
+      if (updated.category !== undefined) {
+        const catMatch = data.categories.find(c => c.name.trim().toLowerCase() === updated.category!.trim().toLowerCase());
+        if (catMatch && isUUID(catMatch.id)) {
+          supaCategoryId = String(catMatch.id);
+        } else {
+          supaCategoryId = null;
+        }
       }
       
       const supaPayload: any = {};
-      if (updated.name !== undefined) supaPayload.name = updated.name;
-      if (updated.price !== undefined) supaPayload.price = updated.price;
+      if (updated.name !== undefined) supaPayload.name = updated.name.trim();
+      if (updated.price !== undefined) supaPayload.price = Number(updated.price);
       if (updated.description !== undefined) supaPayload.description = updated.description;
       if (updated.featured !== undefined) supaPayload.featured = updated.featured;
-      if (updated.image !== undefined) supaPayload.images = [updated.image];
-      if (catMatchId !== undefined) supaPayload.category_id = catMatchId;
+      if (updated.image !== undefined) supaPayload.images = [updated.image.trim()];
+      if (supaCategoryId !== undefined) supaPayload.category_id = supaCategoryId;
       if (updated.inStock !== undefined) supaPayload.stock = updated.inStock ? 10 : 0;
+      if (updated.stock !== undefined) supaPayload.stock = updated.stock;
 
-      const { error } = await supabase.from('products').update(supaPayload).eq('id', id);
-      if (error) {
-        console.error('Supabase Update Error:', error.message);
+      if (isUUID(id)) {
+        const { error } = await supabase.from('products').update(supaPayload).eq('id', id);
+        if (error) console.error('Supabase Product Update Error:', error.message);
       }
     } catch (e) {
       console.error('Failed to update product in Supabase:', e);
@@ -470,9 +522,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     // Push to Supabase
     try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (error) {
-        console.error('Supabase Delete Error:', error.message);
+      if (isUUID(id)) {
+        const { error } = await supabase.from('products').delete().eq('id', id);
+        if (error) console.error('Supabase Product Delete Error:', error.message);
       }
     } catch (e) {
       console.error('Failed to delete product from Supabase:', e);
@@ -490,7 +542,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     try {
-      const { error } = await supabase.from('products').update({ stock: newInStock ? 10 : 0 }).eq('id', id);
+      if (isUUID(id)) {
+        await supabase.from('products').update({ stock: newInStock ? 10 : 0 }).eq('id', id);
+      }
     } catch (e) {}
   };
 
@@ -505,14 +559,16 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     try {
-      const { error } = await supabase.from('products').update({ featured: newFeatured }).eq('id', id);
+      if (isUUID(id)) {
+        await supabase.from('products').update({ featured: newFeatured }).eq('id', id);
+      }
     } catch (e) {}
   };
 
   // Category Operations
   const addCategory = async (newCat: Omit<Category, 'id'>) => {
-    const newId = data.categories.length > 0 ? Math.max(...data.categories.map(c => Number(c.id) || 0)) + 1 : 1;
-    const catToInsert = { ...newCat, id: newId };
+    const tempId = 'cat_' + Date.now();
+    const catToInsert = { ...newCat, id: tempId };
     
     setData(prev => ({
       ...prev,
@@ -521,9 +577,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const supaPayload = {
-        name: newCat.name,
-        image_url: newCat.image,
-        slug: newCat.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now()
+        name: newCat.name.trim(),
+        image_url: newCat.image.trim(),
+        slug: (newCat.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'cat') + '-' + Date.now()
       };
       const { data: inserted, error } = await supabase.from('categories').insert([supaPayload]).select();
       if (error) {
@@ -531,7 +587,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       } else if (inserted && inserted[0]) {
         setData(prev => ({
           ...prev,
-          categories: prev.categories.map(c => c.id === newId ? { ...c, id: inserted[0].id } : c)
+          categories: prev.categories.map(c => c.id === tempId ? { ...c, id: inserted[0].id } : c)
         }));
       }
     } catch (e) {
@@ -546,12 +602,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     try {
-      const supaPayload: any = {};
-      if (updated.name !== undefined) supaPayload.name = updated.name;
-      if (updated.image !== undefined) supaPayload.image_url = updated.image;
-      
-      const { error } = await supabase.from('categories').update(supaPayload).eq('id', id);
-      if (error) console.error('Category update failed:', error.message);
+      if (isUUID(id)) {
+        const supaPayload: any = {};
+        if (updated.name !== undefined) supaPayload.name = updated.name.trim();
+        if (updated.image !== undefined) supaPayload.image_url = updated.image.trim();
+        
+        const { error } = await supabase.from('categories').update(supaPayload).eq('id', id);
+        if (error) console.error('Category update failed:', error.message);
+      }
     } catch (e) {
       console.error('Failed to update category in Supabase:', e);
     }
@@ -564,8 +622,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     try {
-      const { error } = await supabase.from('categories').delete().eq('id', id);
-      if (error) console.error('Category delete failed:', error.message);
+      if (isUUID(id)) {
+        // unlink products from this category first to avoid FK constraint
+        await supabase.from('products').update({ category_id: null }).eq('category_id', id);
+        const { error } = await supabase.from('categories').delete().eq('id', id);
+        if (error) console.error('Category delete failed:', error.message);
+      }
     } catch (e) {
       console.error('Failed to delete category from Supabase:', e);
     }

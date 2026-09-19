@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Settings, 
   Download, 
@@ -8,9 +8,7 @@ import {
   AlertTriangle, 
   ShieldCheck, 
   Database,
-  FileJson,
-  Cloud,
-  Save
+  FileJson
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
@@ -20,40 +18,14 @@ const AdminSettings: React.FC = () => {
     categories, 
     testimonials, 
     faqs, 
-    settings,
     exportBackupJSON, 
     importBackupJSON, 
-    resetToDefaults,
-    updateSettings
+    resetToDefaults
   } = useData();
 
   const [resetConfirm, setResetConfirm] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [cloudinaryForm, setCloudinaryForm] = useState({
-    cloudinaryCloudName: settings?.cloudinaryCloudName || '',
-    cloudinaryUploadPreset: settings?.cloudinaryUploadPreset || ''
-  });
-  
-  useEffect(() => {
-    if (settings) {
-      setCloudinaryForm({
-        cloudinaryCloudName: settings.cloudinaryCloudName || '',
-        cloudinaryUploadPreset: settings.cloudinaryUploadPreset || ''
-      });
-    }
-  }, [settings]);
-
-  const handleSaveCloudinary = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateSettings({
-      ...settings,
-      ...cloudinaryForm
-    });
-    setImportStatus('ক্লাউডিনারী সেটিংস সেভ হয়েছে!');
-    setTimeout(() => setImportStatus(null), 3000);
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -101,60 +73,6 @@ const AdminSettings: React.FC = () => {
           <span>{importStatus}</span>
         </div>
       )}
-
-      {/* Cloudinary API Settings */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 p-5 sm:p-6 shadow-xs">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Cloud size={20} />
-          </div>
-          <div>
-            <h3 className="font-serif font-bold text-base text-gray-900">Cloudinary ইমেজ আপলোড সেটিংস</h3>
-            <p className="text-xs text-gray-500">ইমেজ সরাসরি ক্লাউডিনারিতে সেভ করতে আপনার ক্লাউড নেম ও আপলোড প্রিসেট দিন</p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSaveCloudinary} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
-                Cloud Name (ক্লাউড নেম)
-              </label>
-              <input
-                type="text"
-                value={cloudinaryForm.cloudinaryCloudName}
-                onChange={(e) => setCloudinaryForm({ ...cloudinaryForm, cloudinaryCloudName: e.target.value })}
-                placeholder="যেমন: dxyz123abc"
-                className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl font-mono focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
-                Upload Preset (আপলোড প্রিসেট)
-              </label>
-              <input
-                type="text"
-                value={cloudinaryForm.cloudinaryUploadPreset}
-                onChange={(e) => setCloudinaryForm({ ...cloudinaryForm, cloudinaryUploadPreset: e.target.value })}
-                placeholder="Unsigned preset name"
-                className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl font-mono focus:ring-2 focus:ring-primary/30"
-              />
-              <p className="text-[10px] text-gray-500 mt-1">
-                * প্রিসেটটি অবশ্যই "Unsigned" হতে হবে।
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              className="bg-primary hover:bg-primary/90 text-white font-bold py-2.5 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-            >
-              <Save size={16} />
-              <span>সেটিংস সেভ করুন</span>
-            </button>
-          </div>
-        </form>
-      </div>
 
       {/* Database Stats Card */}
       <div className="bg-white rounded-2xl border border-gray-200/80 p-5 sm:p-6 shadow-xs">
